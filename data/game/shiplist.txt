@@ -1,0 +1,104 @@
+##
+##  Ship list configuration for the Standard Ship List ("Tim list")
+##
+##  This file contains the parameters which are fixed for this ship
+##  list, and are usually never changed. The game configuration is in a
+##  separate file, pconfig.src.
+##
+##  Instructions: copy this file into your game directory, and
+##  rename it to "shiplist.txt".
+##
+
+#
+#  PHost configuration items
+#
+
+% PHOST
+
+## Battle configuration. This yields "tim-compatible" combat.
+
+  AllowEngineShieldBonus          = No
+  AllowESBonusAgainstPlanets      = No
+  EngineShieldBonusRate           = 0
+
+  AllowAlternativeCombat          = No
+
+  BeamFiringRange                 = 20000
+  BeamHitShipCharge               = 600
+  BeamHitFighterRange             = 100000
+  BeamHitFighterCharge            = 500
+  BeamHitOdds                     = 100
+  BeamHitBonus                    = 0
+  BeamRechargeRate                = 8
+  BeamRechargeBonus               = 0
+  FireOnAttackFighters            = No 
+  
+  ExtraFighterBays                = 3,0,0,0,0,0,0,0,0,0,0
+  BayLaunchInterval               = 3
+  BayRechargeRate                 = 52
+  BayRechargeBonus                = 2
+  FighterBeamExplosive            = 2
+  FighterBeamKill                 = 2
+  FighterFiringRange              = 3000
+  FighterKillOdds                 = 20
+  FighterMovementSpeed            = 235
+  MaxFightersLaunched             = 19
+  StrikesPerFighter               = 7
+
+  TorpFiringRange                 = 30000
+  TorpHitOdds                     = 65
+  TorpHitBonus                    = 0
+  TubeRechargeRate                = 45
+  TubeRechargeBonus               = 0
+  PlanetsHaveTubes                = No
+  PlanetaryTorpsPerTube           = 3
+
+  CrewKillScaling                 = 80
+  HullDamageScaling               = 80
+  ShieldDamageScaling             = 80
+  ShieldKillScaling               = 0
+  ShipMovementSpeed               = 75
+  StandoffDistance                = 3000
+
+## Towing configuration. In case alternative towing is used with this
+## ship list, parameters are as follows:
+
+  TowStrengthEngineScale          = 1
+  TowStrengthDistanceScale        = 19
+
+## Experience. This configures four experience levels. To enable this,
+## say "NumExperienceLevels = 4" in pconfig.src.
+
+  EPTrainingScale                 = 70
+
+  EModBayRechargeRate             = 1,2,3,4
+  EModBayRechargeBonus            = 0,0,0,0
+  EModBeamRechargeRate            = 0,0,0,0
+  EModBeamRechargeBonus           = 0,0,0,0
+  EModTubeRechargeRate            = 1,2,3,8
+  EModBeamHitFighterCharge        = 0,0,0,0
+  EModTorpHitOdds                 = 9,18,27,35
+  EModBeamHitOdds                 = 0,0,0,0
+  EModBeamHitBonus                = 0,0,0,0
+  EModStrikesPerFighter           = 1,2,3,4
+  EModFighterBeamExplosive        = 0,0,0,0
+  EModFighterBeamKill             = 0,0,0,0
+  EModFighterMovementSpeed        = 0,0,0,0
+  EModMaxFightersLaunched         = 0,0,0,0
+  EModTorpHitBonus                = 0,0,0,0
+  EModTubeRechargeBonus           = 0,0,0,0
+  EModExtraFighterBays            = 0,0,0,0
+  EModEngineShieldBonusRate       = 0,0,0,0
+  EModShieldDamageScaling         = 0,0,0,0
+  EModShieldKillScaling           = 0,0,0,0
+  EModHullDamageScaling           = 0,0,0,0
+  EModCrewKillScaling             = -5,-10,-15,-20
+  EModPlanetaryTorpsPerTube       = 0,0,0,0
+
+#
+#  Hull Functions. The built-in defaults match Tim's Host.
+#
+
+% HULLFUNC
+
+  Init = Default

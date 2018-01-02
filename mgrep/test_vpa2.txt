@@ -1,0 +1,25 @@
+--- Message 2 (mgrep/test_vpa2.db) ---
+TURN: 47
+(-r9000)<< Sub Space Message >>
+FROM: The Robotic Imperium
+TO: The Cyborg
+
+Allied Planets
+Passcode : 1520
+2 9 519 36 44 47 48 87 115 145
+154 170 171 174 193 199 214 218 728 248
+257 261 269 277 278 280 284 286 292 305
+315 319 342 344 352 359 386 393 394 455
+461 470 471
+--- Message 16 (mgrep/test_vpa2.db) ---
+TURN: 47
+(-r6000)<< Sub Space Message >>
+FROM: The Cyborg
+TO: The Robotic Imperium
+
+Allied Planets
+Passcode : 1520
+515 24 46 97 106 137 178 680 194 212
+222 230 237 262 291 796 297 301 306 308
+326 329 831 343 349 373 376 388 421 438
+959 466

@@ -1,0 +1,58 @@
+Subject: test
+From: stefan@localhost
+Content-Type: multipart/mixed; boundary=10
+
+--10
+Content-Type: multipart/mixed; boundary=9
+
+--9
+Content-Type: multipart/mixed; boundary=8
+
+--8
+Content-Type: multipart/mixed; boundary=7
+
+--7
+Content-Type: multipart/mixed; boundary=6
+
+--6
+Content-Type: multipart/mixed; boundary=5
+
+--5
+Content-Type: multipart/mixed; boundary=4
+
+--4
+Content-Type: multipart/mixed; boundary=3
+
+--3
+Content-Type: multipart/mixed; boundary=2
+
+--2
+Content-Type: multipart/mixed; boundary=1
+
+--1
+Content-Type: application/octet-stream
+Content-Disposition: attachment; filename="player2.trn"
+Content-Transfer-Encoding: base64
+
+AgAAAAAAMDYtMDItMjAxMjE5OjA3OjA0AACQA1ZFUjMuNTAxNo7TcqllgGnHrFJME0KOeQny
+TAxhU8wa5KB+1+CaF/KnlNg3KnIsritshzhkBCHsOsSAXvfAujfSh5LoWN5apmZIbQtpzAmc
+Nu06Bwsaf/UDRZ3Wmj2tPsMIZE1MDL5k/ViUGicrOl/VI2W9Q2xpZW50OiBQbGFuZXRzIENv
+bW1hbmQgQ2VudGVyIElJICh2Mi4wLjIpICAgICAgICBodHRwOi8vcGhvc3QuZGUvfnN0ZWZh
+bi9wY2MyLmh0bWwgICAgICAgICAgICAgICAgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAADKXgAAUENDMjcEAADICwAAYw8AALgUAAChGAAAhCEAAGAL
+AABQIQAAKS4AAGo7AADMQAAAYD8AAK1CAAAMUQAAYBgAAAAaAACgGwAAQB0AAOAeAACAIAAA
+ICIAAMAjAABgJQAAACcAAKAoAAB0AwAAlAsAAGMPAABcFwAAZBkAAMYeAAAaJwAA4BEAAKAO
+AAAOJAAAazgAAHhFAAD1RwAA9kQAAMpTAABQYgAAoBsAAEAdAADgHgAAgCAAACAiAADAIwAA
+YCUAAAAnAACgKAAAJE4HAAAAAAAzYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAA
+--1--
+--2--
+--3--
+--4--
+--5--
+--6--
+--7--
+--8--
+--9--
+--10--

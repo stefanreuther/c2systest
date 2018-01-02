@@ -1,0 +1,11 @@
+--- Message 7 (mgrep/test_out35.dat) ---
+TO: player 1
+<<< VPA Data Transmission >>>
+
+OBJECT: Planet 4
+DATA: 1840054363
+chaachaahaaadhafheebaaocaaocaakhaaaaaakf
+aaaaaaicaaaaaaebaaaaaaocaaaaaaanaaaaaafk
+aaaaaapmaaaaaaipdaaaaanabaaaaaeaaaaaaabc
+aakfaajcaahfaaaaaacaaaegaaegaafaaalmofaa
+aahaaaceaaaaaaaaaahaaa

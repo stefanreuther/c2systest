@@ -1,0 +1,14 @@
+--- Message 46 (mgrep/test_inbox.dat) ---
+(-h000) PHOST v4.0d
+HUL=10B0DA04
+ENG=363D94EC
+BEA=90E9AD04
+TOR=B78DD438
+TRU=6AEF5E11
+PXY=8F869B18
+CFG=C74FDA0F
+NAM=0D78D13B
+
+The above information is for use by
+external player utilities and can
+be safely ignored.

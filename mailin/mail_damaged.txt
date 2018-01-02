@@ -1,0 +1,35 @@
+From stefan@rocket.streu.home Wed Sep 27 18:36:28 2017
+Return-path: <stefan@rocket.streu.home>
+Envelope-to: stefan@localhost
+Delivery-date: Wed, 27 Sep 2017 18:36:28 +0200
+Received: from stefan by rocket.speedport.ip with local (Exim 4.84)
+        (envelope-from <stefan@rocket.streu.home>)
+        id 1dxFK0-0001ao-De
+        for stefan@localhost; Wed, 27 Sep 2017 18:36:28 +0200
+Date: Wed, 27 Sep 2017 18:36:28 +0200
+From: Stefan Reuther <stefan@localhost>
+To: stefan@localhost
+Subject: test
+Message-ID: <20170927163628.GA6110@rocket.streu.home>
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="LZvS9be/3tNcYl/X"
+Content-Disposition: inline
+User-Agent: Mutt/1.5.23 (2014-03-12)
+Status: RO
+Content-Length: 1085
+Lines: 26
+
+
+--LZvS9be/3tNcYl/X
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+
+the mail
+
+--LZvS9be/3tNcYl/X
+Content-Type: application/octet-stream
+Content-Disposition: attachment; filename="player2.trn"
+Content-Transfer-Encoding: base64
+
+--LZvS9be/3tNcYl/X--
+

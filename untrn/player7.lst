@@ -1,0 +1,929 @@
+;==================================================
+; Listing of `player7.trn'
+;==================================================
+;
+; Winplan trailer present, sub-version 1
+
+Player               = 7
+Commands             = 211
+Timestamp            = "11-06-201603:00:06"
+Time checksum        = 904                        ; okay
+
+ShipChangeWaypoint                                ; index 1, position 00000369
+  Ship Id            = 63
+  WaypointDX         = -3
+  WaypointDY         = -34
+
+ShipChangeMission                                 ; index 2, position 00000371
+  Ship Id            = 63
+  Mission            = 2
+
+ShipIntercept                                     ; index 3, position 00000377
+  Ship Id            = 63
+  Target Id          = 0
+
+ShipChangeNeutronium                              ; index 4, position 0000037D
+  Ship Id            = 63
+  Neutronium         = 263
+
+ShipChangeTritanium                               ; index 5, position 00000383
+  Ship Id            = 63
+  Tritanium          = 154
+
+ShipChangeDuranium                                ; index 6, position 00000389
+  Ship Id            = 63
+  Duranium           = 154
+
+ShipChangeMolybdenum                              ; index 7, position 0000038F
+  Ship Id            = 63
+  Molybdenum         = 154
+
+ShipChangeSupplies                                ; index 8, position 00000395
+  Ship Id            = 63
+  Supplies           = 2
+
+ShipChangeMoney                                   ; index 9, position 0000039B
+  Ship Id            = 63
+  Money              = 10000
+
+ShipChangeSpeed                                   ; index 10, position 000003A1
+  Ship Id            = 97
+  Speed              = 5
+
+ShipChangeWaypoint                                ; index 11, position 000003A7
+  Ship Id            = 97
+  WaypointDX         = -3
+  WaypointDY         = -34
+
+ShipChangeTritanium                               ; index 12, position 000003AF
+  Ship Id            = 97
+  Tritanium          = 6
+
+ShipChangeDuranium                                ; index 13, position 000003B5
+  Ship Id            = 97
+  Duranium           = 7
+
+ShipChangeMolybdenum                              ; index 14, position 000003BB
+  Ship Id            = 97
+  Molybdenum         = 7
+
+ShipChangeSupplies                                ; index 15, position 000003C1
+  Ship Id            = 97
+  Supplies           = 30
+
+ShipChangeMoney                                   ; index 16, position 000003C7
+  Ship Id            = 97
+  Money              = 1345
+
+ShipChangeFc                                      ; index 17, position 000003CD
+  Ship Id            = 132
+  FCode              = "za]"
+
+ShipChangeSpeed                                   ; index 18, position 000003D4
+  Ship Id            = 132
+  Speed              = 5
+
+ShipChangeWaypoint                                ; index 19, position 000003DA
+  Ship Id            = 132
+  WaypointDX         = -22
+  WaypointDY         = 0
+
+ShipChangeNeutronium                              ; index 20, position 000003E2
+  Ship Id            = 132
+  Neutronium         = 791
+
+ShipChangeTritanium                               ; index 21, position 000003E8
+  Ship Id            = 132
+  Tritanium          = 20
+
+ShipChangeDuranium                                ; index 22, position 000003EE
+  Ship Id            = 132
+  Duranium           = 20
+
+ShipChangeMolybdenum                              ; index 23, position 000003F4
+  Ship Id            = 132
+  Molybdenum         = 20
+
+ShipChangeSupplies                                ; index 24, position 000003FA
+  Ship Id            = 132
+  Supplies           = 30
+
+ShipChangeColonists                               ; index 25, position 00000400
+  Ship Id            = 132
+  Clans              = 0
+
+ShipChangeMoney                                   ; index 26, position 00000406
+  Ship Id            = 132
+  Money              = 2626
+
+ShipChangeFc                                      ; index 27, position 0000040C
+  Ship Id            = 146
+  FCode              = "mkt"
+
+ShipChangeNeutronium                              ; index 28, position 00000413
+  Ship Id            = 146
+  Neutronium         = 260
+
+ShipChangeTritanium                               ; index 29, position 00000419
+  Ship Id            = 146
+  Tritanium          = 97
+
+ShipChangeDuranium                                ; index 30, position 0000041F
+  Ship Id            = 146
+  Duranium           = 46
+
+ShipChangeMolybdenum                              ; index 31, position 00000425
+  Ship Id            = 146
+  Molybdenum         = 73
+
+ShipChangeMoney                                   ; index 32, position 0000042B
+  Ship Id            = 146
+  Money              = 51
+
+ShipChangeFc                                      ; index 33, position 00000431
+  Ship Id            = 155
+  FCode              = "+ca"
+
+ShipChangeSpeed                                   ; index 34, position 00000438
+  Ship Id            = 155
+  Speed              = 8
+
+ShipChangeWaypoint                                ; index 35, position 0000043E
+  Ship Id            = 155
+  WaypointDX         = 54
+  WaypointDY         = 0
+
+ShipChangeSpeed                                   ; index 36, position 00000446
+  Ship Id            = 228
+  Speed              = 9
+
+ShipChangeWaypoint                                ; index 37, position 0000044C
+  Ship Id            = 228
+  WaypointDX         = -24
+  WaypointDY         = 74
+
+ShipChangeNeutronium                              ; index 38, position 00000454
+  Ship Id            = 228
+  Neutronium         = 150
+
+ShipChangeTritanium                               ; index 39, position 0000045A
+  Ship Id            = 228
+  Tritanium          = 0
+
+ShipChangeDuranium                                ; index 40, position 00000460
+  Ship Id            = 228
+  Duranium           = 0
+
+ShipChangeMolybdenum                              ; index 41, position 00000466
+  Ship Id            = 228
+  Molybdenum         = 0
+
+ShipChangeMoney                                   ; index 42, position 0000046C
+  Ship Id            = 228
+  Money              = 0
+
+ShipChangeFc                                      ; index 43, position 00000472
+  Ship Id            = 257
+  FCode              = "/0!"
+
+ShipChangeSpeed                                   ; index 44, position 00000479
+  Ship Id            = 257
+  Speed              = 8
+
+ShipChangeWaypoint                                ; index 45, position 0000047F
+  Ship Id            = 257
+  WaypointDX         = 52
+  WaypointDY         = -32
+
+ShipChangeNeutronium                              ; index 46, position 00000487
+  Ship Id            = 257
+  Neutronium         = 312
+
+ShipChangeTritanium                               ; index 47, position 0000048D
+  Ship Id            = 257
+  Tritanium          = 300
+
+ShipChangeDuranium                                ; index 48, position 00000493
+  Ship Id            = 257
+  Duranium           = 300
+
+ShipChangeMolybdenum                              ; index 49, position 00000499
+  Ship Id            = 257
+  Molybdenum         = 300
+
+ShipChangeMoney                                   ; index 50, position 0000049F
+  Ship Id            = 257
+  Money              = 659
+
+ShipChangeFc                                      ; index 51, position 000004A5
+  Ship Id            = 288
+  FCode              = ")T3"
+
+ShipChangeWaypoint                                ; index 52, position 000004AC
+  Ship Id            = 288
+  WaypointDX         = -37
+  WaypointDY         = 73
+
+ShipChangeNeutronium                              ; index 53, position 000004B4
+  Ship Id            = 288
+  Neutronium         = 270
+
+ShipChangeTritanium                               ; index 54, position 000004BA
+  Ship Id            = 288
+  Tritanium          = 16
+
+ShipChangeDuranium                                ; index 55, position 000004C0
+  Ship Id            = 288
+  Duranium           = 4
+
+ShipChangeMolybdenum                              ; index 56, position 000004C6
+  Ship Id            = 288
+  Molybdenum         = 16
+
+ShipChangeMoney                                   ; index 57, position 000004CC
+  Ship Id            = 288
+  Money              = 2011
+
+ShipChangeSpeed                                   ; index 58, position 000004D2
+  Ship Id            = 299
+  Speed              = 2
+
+ShipChangeWaypoint                                ; index 59, position 000004D8
+  Ship Id            = 299
+  WaypointDX         = 2
+  WaypointDY         = 4
+
+ShipChangeWaypoint                                ; index 60, position 000004E0
+  Ship Id            = 332
+  WaypointDX         = 22
+  WaypointDY         = -50
+
+ShipChangeNeutronium                              ; index 61, position 000004E8
+  Ship Id            = 332
+  Neutronium         = 270
+
+ShipChangeMoney                                   ; index 62, position 000004EE
+  Ship Id            = 332
+  Money              = 441
+
+ShipChangeSpeed                                   ; index 63, position 000004F4
+  Ship Id            = 348
+  Speed              = 6
+
+ShipChangeWaypoint                                ; index 64, position 000004FA
+  Ship Id            = 348
+  WaypointDX         = 0
+  WaypointDY         = -34
+
+ShipChangeSpeed                                   ; index 65, position 00000502
+  Ship Id            = 384
+  Speed              = 6
+
+ShipChangeWaypoint                                ; index 66, position 00000508
+  Ship Id            = 384
+  WaypointDX         = 0
+  WaypointDY         = -34
+
+ShipChangeMission                                 ; index 67, position 00000510
+  Ship Id            = 384
+  Mission            = 22
+
+ShipIntercept                                     ; index 68, position 00000516
+  Ship Id            = 384
+  Target Id          = 50
+
+ShipChangeWaypoint                                ; index 69, position 0000051C
+  Ship Id            = 458
+  WaypointDX         = 8
+  WaypointDY         = 0
+
+ShipChangeMission                                 ; index 70, position 00000524
+  Ship Id            = 458
+  Mission            = 2
+
+ShipIntercept                                     ; index 71, position 0000052A
+  Ship Id            = 458
+  Target Id          = 0
+
+ShipChangeWaypoint                                ; index 72, position 00000530
+  Ship Id            = 460
+  WaypointDX         = 22
+  WaypointDY         = 76
+
+ShipChangeNeutronium                              ; index 73, position 00000538
+  Ship Id            = 460
+  Neutronium         = 533
+
+ShipChangeTritanium                               ; index 74, position 0000053E
+  Ship Id            = 460
+  Tritanium          = 234
+
+ShipChangeDuranium                                ; index 75, position 00000544
+  Ship Id            = 460
+  Duranium           = 27
+
+ShipChangeMolybdenum                              ; index 76, position 0000054A
+  Ship Id            = 460
+  Molybdenum         = 234
+
+ShipChangeMoney                                   ; index 77, position 00000550
+  Ship Id            = 460
+  Money              = 338
+
+ShipChangeSpeed                                   ; index 78, position 00000556
+  Ship Id            = 469
+  Speed              = 2
+
+ShipChangeWaypoint                                ; index 79, position 0000055C
+  Ship Id            = 469
+  WaypointDX         = -2
+  WaypointDY         = -4
+
+ShipChangeNeutronium                              ; index 80, position 00000564
+  Ship Id            = 469
+  Neutronium         = 260
+
+ShipChangeTritanium                               ; index 81, position 0000056A
+  Ship Id            = 469
+  Tritanium          = 3
+
+ShipChangeDuranium                                ; index 82, position 00000570
+  Ship Id            = 469
+  Duranium           = 3
+
+ShipChangeMolybdenum                              ; index 83, position 00000576
+  Ship Id            = 469
+  Molybdenum         = 11
+
+ShipChangeSupplies                                ; index 84, position 0000057C
+  Ship Id            = 469
+  Supplies           = 30
+
+ShipChangeColonists                               ; index 85, position 00000582
+  Ship Id            = 469
+  Clans              = 150
+
+ShipChangeMoney                                   ; index 86, position 00000588
+  Ship Id            = 469
+  Money              = 476
+
+PlanetChangeFc                                    ; index 87, position 0000058E
+  Planet Id          = 30
+  FCode              = "!;j"
+
+PlanetChangeFc                                    ; index 88, position 00000595
+  Planet Id          = 38
+  FCode              = "!f]"
+
+PlanetChangeFc                                    ; index 89, position 0000059C
+  Planet Id          = 54
+  FCode              = ":Pw"
+
+PlanetChangeFactories                             ; index 90, position 000005A3
+  Planet Id          = 54
+  Factories          = 44
+
+PlanetChangeDefense                               ; index 91, position 000005A9
+  Planet Id          = 54
+  Defense            = 44
+
+PlanetChangeNeutronium                            ; index 92, position 000005AF
+  Planet Id          = 54
+  Neutronium         = 301
+
+PlanetChangeTritanium                             ; index 93, position 000005B7
+  Planet Id          = 54
+  Tritanium          = 634
+
+PlanetChangeDuranium                              ; index 94, position 000005BF
+  Planet Id          = 54
+  Duranium           = 1477
+
+PlanetChangeMolybdenum                            ; index 95, position 000005C7
+  Planet Id          = 54
+  Molybdenum         = 208
+
+PlanetChangeSupplies                              ; index 96, position 000005CF
+  Planet Id          = 54
+  Supplies           = 261
+
+PlanetChangeMoney                                 ; index 97, position 000005D7
+  Planet Id          = 54
+  Money              = 2792
+
+PlanetChangeFc                                    ; index 98, position 000005DF
+  Planet Id          = 62
+  FCode              = "e/F"
+
+PlanetChangeFactories                             ; index 99, position 000005E6
+  Planet Id          = 62
+  Factories          = 165
+
+PlanetChangeDefense                               ; index 100, position 000005EC
+  Planet Id          = 62
+  Defense            = 115
+
+PlanetChangeSupplies                              ; index 101, position 000005F2
+  Planet Id          = 62
+  Supplies           = 643
+
+PlanetChangeMoney                                 ; index 102, position 000005FA
+  Planet Id          = 62
+  Money              = 12995
+
+PlanetChangeFc                                    ; index 103, position 00000602
+  Planet Id          = 70
+  FCode              = "kFT"
+
+PlanetChangeFactories                             ; index 104, position 00000609
+  Planet Id          = 70
+  Factories          = 115
+
+PlanetChangeNeutronium                            ; index 105, position 0000060F
+  Planet Id          = 70
+  Neutronium         = 0
+
+PlanetChangeTritanium                             ; index 106, position 00000617
+  Planet Id          = 70
+  Tritanium          = 0
+
+PlanetChangeDuranium                              ; index 107, position 0000061F
+  Planet Id          = 70
+  Duranium           = 0
+
+PlanetChangeMolybdenum                            ; index 108, position 00000627
+  Planet Id          = 70
+  Molybdenum         = 0
+
+PlanetChangeSupplies                              ; index 109, position 0000062F
+  Planet Id          = 70
+  Supplies           = 0
+
+PlanetChangeFc                                    ; index 110, position 00000637
+  Planet Id          = 91
+  FCode              = "Ib_"
+
+PlanetChangeNeutronium                            ; index 111, position 0000063E
+  Planet Id          = 91
+  Neutronium         = 0
+
+PlanetChangeTritanium                             ; index 112, position 00000646
+  Planet Id          = 91
+  Tritanium          = 12
+
+PlanetChangeDuranium                              ; index 113, position 0000064E
+  Planet Id          = 91
+  Duranium           = 2217
+
+PlanetChangeMolybdenum                            ; index 114, position 00000656
+  Planet Id          = 91
+  Molybdenum         = 46
+
+PlanetChangeSupplies                              ; index 115, position 0000065E
+  Planet Id          = 91
+  Supplies           = 0
+
+PlanetChangeFc                                    ; index 116, position 00000666
+  Planet Id          = 107
+  FCode              = "k7Z"
+
+PlanetChangeFc                                    ; index 117, position 0000066D
+  Planet Id          = 112
+  FCode              = "_iB"
+
+PlanetChangeDefense                               ; index 118, position 00000674
+  Planet Id          = 112
+  Defense            = 11
+
+PlanetChangeNeutronium                            ; index 119, position 0000067A
+  Planet Id          = 112
+  Neutronium         = 88
+
+PlanetChangeTritanium                             ; index 120, position 00000682
+  Planet Id          = 112
+  Tritanium          = 152
+
+PlanetChangeDuranium                              ; index 121, position 0000068A
+  Planet Id          = 112
+  Duranium           = 65
+
+PlanetChangeMolybdenum                            ; index 122, position 00000692
+  Planet Id          = 112
+  Molybdenum         = 48
+
+PlanetChangeColonists                             ; index 123, position 0000069A
+  Planet Id          = 112
+  Clans              = 11
+
+PlanetChangeSupplies                              ; index 124, position 000006A2
+  Planet Id          = 112
+  Supplies           = 0
+
+PlanetChangeMoney                                 ; index 125, position 000006AA
+  Planet Id          = 112
+  Money              = 0
+
+PlanetNativeTax                                   ; index 126, position 000006B2
+  Planet Id          = 112
+  Tax Rate           = 1
+
+PlanetChangeFc                                    ; index 127, position 000006B8
+  Planet Id          = 134
+  FCode              = "8*2"
+
+PlanetChangeNeutronium                            ; index 128, position 000006BF
+  Planet Id          = 134
+  Neutronium         = 0
+
+PlanetChangeTritanium                             ; index 129, position 000006C7
+  Planet Id          = 134
+  Tritanium          = 993
+
+PlanetChangeDuranium                              ; index 130, position 000006CF
+  Planet Id          = 134
+  Duranium           = 1428
+
+PlanetChangeMolybdenum                            ; index 131, position 000006D7
+  Planet Id          = 134
+  Molybdenum         = 0
+
+PlanetChangeSupplies                              ; index 132, position 000006DF
+  Planet Id          = 134
+  Supplies           = 0
+
+PlanetChangeFc                                    ; index 133, position 000006E7
+  Planet Id          = 139
+  FCode              = "(K*"
+
+PlanetChangeFc                                    ; index 134, position 000006EE
+  Planet Id          = 149
+  FCode              = "WRx"
+
+PlanetChangeNeutronium                            ; index 135, position 000006F5
+  Planet Id          = 149
+  Neutronium         = 64
+
+PlanetChangeTritanium                             ; index 136, position 000006FD
+  Planet Id          = 149
+  Tritanium          = 0
+
+PlanetChangeDuranium                              ; index 137, position 00000705
+  Planet Id          = 149
+  Duranium           = 0
+
+PlanetChangeMolybdenum                            ; index 138, position 0000070D
+  Planet Id          = 149
+  Molybdenum         = 0
+
+PlanetChangeSupplies                              ; index 139, position 00000715
+  Planet Id          = 149
+  Supplies           = 0
+
+PlanetChangeFc                                    ; index 140, position 0000071D
+  Planet Id          = 150
+  FCode              = "r.'"
+
+PlanetChangeDefense                               ; index 141, position 00000724
+  Planet Id          = 150
+  Defense            = 66
+
+PlanetChangeSupplies                              ; index 142, position 0000072A
+  Planet Id          = 150
+  Supplies           = 563
+
+PlanetChangeMoney                                 ; index 143, position 00000732
+  Planet Id          = 150
+  Money              = 1347
+
+PlanetChangeFc                                    ; index 144, position 0000073A
+  Planet Id          = 156
+  FCode              = "16C"
+
+PlanetChangeMines                                 ; index 145, position 00000741
+  Planet Id          = 156
+  Mines              = 84
+
+PlanetChangeFactories                             ; index 146, position 00000747
+  Planet Id          = 156
+  Factories          = 84
+
+PlanetChangeSupplies                              ; index 147, position 0000074D
+  Planet Id          = 156
+  Supplies           = 164
+
+PlanetChangeMoney                                 ; index 148, position 00000755
+  Planet Id          = 156
+  Money              = 20
+
+PlanetColonistTax                                 ; index 149, position 0000075D
+  Planet Id          = 156
+  Tax Rate           = 6
+
+PlanetChangeFc                                    ; index 150, position 00000763
+  Planet Id          = 163
+  FCode              = "obJ"
+
+PlanetChangeFc                                    ; index 151, position 0000076A
+  Planet Id          = 175
+  FCode              = "r&G"
+
+PlanetChangeFc                                    ; index 152, position 00000771
+  Planet Id          = 181
+  FCode              = "@TQ"
+
+PlanetChangeFc                                    ; index 153, position 00000778
+  Planet Id          = 184
+  FCode              = "OH$"
+
+PlanetChangeFactories                             ; index 154, position 0000077F
+  Planet Id          = 184
+  Factories          = 135
+
+PlanetChangeNeutronium                            ; index 155, position 00000785
+  Planet Id          = 184
+  Neutronium         = 20
+
+PlanetChangeTritanium                             ; index 156, position 0000078D
+  Planet Id          = 184
+  Tritanium          = 0
+
+PlanetChangeDuranium                              ; index 157, position 00000795
+  Planet Id          = 184
+  Duranium           = 0
+
+PlanetChangeMolybdenum                            ; index 158, position 0000079D
+  Planet Id          = 184
+  Molybdenum         = 0
+
+PlanetChangeSupplies                              ; index 159, position 000007A5
+  Planet Id          = 184
+  Supplies           = 0
+
+PlanetChangeMoney                                 ; index 160, position 000007AD
+  Planet Id          = 184
+  Money              = 0
+
+PlanetChangeFactories                             ; index 161, position 000007B5
+  Planet Id          = 187
+  Factories          = 146
+
+PlanetChangeDefense                               ; index 162, position 000007BB
+  Planet Id          = 187
+  Defense            = 96
+
+PlanetChangeNeutronium                            ; index 163, position 000007C1
+  Planet Id          = 187
+  Neutronium         = 73
+
+PlanetChangeTritanium                             ; index 164, position 000007C9
+  Planet Id          = 187
+  Tritanium          = 0
+
+PlanetChangeDuranium                              ; index 165, position 000007D1
+  Planet Id          = 187
+  Duranium           = 769
+
+PlanetChangeMolybdenum                            ; index 166, position 000007D9
+  Planet Id          = 187
+  Molybdenum         = 0
+
+PlanetChangeColonists                             ; index 167, position 000007E1
+  Planet Id          = 187
+  Clans              = 2047
+
+PlanetChangeSupplies                              ; index 168, position 000007E9
+  Planet Id          = 187
+  Supplies           = 0
+
+PlanetChangeMoney                                 ; index 169, position 000007F1
+  Planet Id          = 187
+  Money              = 0
+
+PlanetNativeTax                                   ; index 170, position 000007F9
+  Planet Id          = 187
+  Tax Rate           = 1
+
+PlanetChangeFc                                    ; index 171, position 000007FF
+  Planet Id          = 203
+  FCode              = "oWT"
+
+PlanetChangeFactories                             ; index 172, position 00000806
+  Planet Id          = 230
+  Factories          = 121
+
+PlanetChangeSupplies                              ; index 173, position 0000080C
+  Planet Id          = 230
+  Supplies           = 5643
+
+PlanetChangeMoney                                 ; index 174, position 00000814
+  Planet Id          = 230
+  Money              = 3805
+
+PlanetChangeFc                                    ; index 175, position 0000081C
+  Planet Id          = 240
+  FCode              = "rZ0"
+
+PlanetChangeFc                                    ; index 176, position 00000823
+  Planet Id          = 264
+  FCode              = "_a="
+
+PlanetChangeFc                                    ; index 177, position 0000082A
+  Planet Id          = 269
+  FCode              = "(In"
+
+PlanetChangeFc                                    ; index 178, position 00000831
+  Planet Id          = 270
+  FCode              = "WcA"
+
+PlanetChangeMines                                 ; index 179, position 00000838
+  Planet Id          = 270
+  Mines              = 45
+
+PlanetChangeDefense                               ; index 180, position 0000083E
+  Planet Id          = 270
+  Defense            = 45
+
+PlanetChangeSupplies                              ; index 181, position 00000844
+  Planet Id          = 270
+  Supplies           = 723
+
+PlanetChangeMoney                                 ; index 182, position 0000084C
+  Planet Id          = 270
+  Money              = 23
+
+PlanetChangeFc                                    ; index 183, position 00000854
+  Planet Id          = 283
+  FCode              = "qv3"
+
+PlanetChangeFc                                    ; index 184, position 0000085B
+  Planet Id          = 286
+  FCode              = "h1;"
+
+PlanetChangeFc                                    ; index 185, position 00000862
+  Planet Id          = 315
+  FCode              = ";pr"
+
+PlanetChangeFc                                    ; index 186, position 00000869
+  Planet Id          = 329
+  FCode              = "_K["
+
+PlanetChangeFactories                             ; index 187, position 00000870
+  Planet Id          = 329
+  Factories          = 111
+
+PlanetChangeSupplies                              ; index 188, position 00000876
+  Planet Id          = 329
+  Supplies           = 328
+
+PlanetChangeMoney                                 ; index 189, position 0000087E
+  Planet Id          = 329
+  Money              = 350
+
+PlanetChangeFc                                    ; index 190, position 00000886
+  Planet Id          = 330
+  FCode              = ">'f"
+
+PlanetChangeNeutronium                            ; index 191, position 0000088D
+  Planet Id          = 330
+  Neutronium         = 246
+
+PlanetChangeSupplies                              ; index 192, position 00000895
+  Planet Id          = 330
+  Supplies           = 0
+
+PlanetChangeFc                                    ; index 193, position 0000089D
+  Planet Id          = 342
+  FCode              = "*9B"
+
+PlanetChangeFc                                    ; index 194, position 000008A4
+  Planet Id          = 401
+  FCode              = "I\\("
+
+PlanetChangeFc                                    ; index 195, position 000008AB
+  Planet Id          = 426
+  FCode              = "e2z"
+
+PlanetChangeFactories                             ; index 196, position 000008B2
+  Planet Id          = 426
+  Factories          = 108
+
+PlanetChangeSupplies                              ; index 197, position 000008B8
+  Planet Id          = 426
+  Supplies           = 779
+
+PlanetChangeMoney                                 ; index 198, position 000008C0
+  Planet Id          = 426
+  Money              = 84
+
+PlanetChangeFc                                    ; index 199, position 000008C8
+  Planet Id          = 430
+  FCode              = "%6W"
+
+PlanetChangeFc                                    ; index 200, position 000008CF
+  Planet Id          = 444
+  FCode              = "KaF"
+
+PlanetChangeDefense                               ; index 201, position 000008D6
+  Planet Id          = 444
+  Defense            = 61
+
+PlanetChangeDuranium                              ; index 202, position 000008DC
+  Planet Id          = 444
+  Duranium           = 436
+
+PlanetChangeSupplies                              ; index 203, position 000008E4
+  Planet Id          = 444
+  Supplies           = 1690
+
+PlanetChangeMoney                                 ; index 204, position 000008EC
+  Planet Id          = 444
+  Money              = 311
+
+PlanetChangeFc                                    ; index 205, position 000008F4
+  Planet Id          = 476
+  FCode              = "s+9"
+
+BaseBuildShip                                     ; index 206, position 000008FB
+  Base Id            = 134
+  Hull Type          = 7
+  Engine Type        = 8
+  Beam Type          = 9
+  Beam Count         = 5
+  Torp Type          = 0
+  Torp Count         = 0
+  Unused             = 0
+
+BaseBuildShip                                     ; index 207, position 0000090D
+  Base Id            = 203
+  Hull Type          = 13
+  Engine Type        = 8
+  Beam Type          = 10
+  Beam Count         = 9
+  Torp Type          = 0
+  Torp Count         = 0
+  Unused             = 0
+
+BaseBuildShip                                     ; index 208, position 0000091F
+  Base Id            = 230
+  Hull Type          = 14
+  Engine Type        = 9
+  Beam Type          = 10
+  Beam Count         = 12
+  Torp Type          = 10
+  Torp Count         = 11
+  Unused             = 0
+
+BaseBuildShip                                     ; index 209, position 00000931
+  Base Id            = 286
+  Hull Type          = 13
+  Engine Type        = 8
+  Beam Type          = 10
+  Beam Count         = 9
+  Torp Type          = 0
+  Torp Count         = 0
+  Unused             = 0
+
+BaseBuildShip                                     ; index 210, position 00000943
+  Base Id            = 417
+  Hull Type          = 4
+  Engine Type        = 7
+  Beam Type          = 5
+  Beam Count         = 3
+  Torp Type          = 9
+  Torp Count         = 3
+  Unused             = 0
+
+BaseChangeDefense                                 ; index 211, position 00000955
+  Base Id            = 444
+  Defense            = 30
+
+; Version 3.5 file format (Winplan)
+; Sub-version 1
+VPH A                = 0E0AFA12                   ; -> VPH = 2B386BB8
+VPH B                = 253291AA                   ;    Turn = 79
+RegStr1              = "Stefan Reuther"
+RegStr2              = "Dresden, Germany"
+RegStr3              = "Client: Planets Command Center II (v2.0.2)"
+                                                  ; Player Name
+RegStr4              = "http://phost.de/~stefan/pcc2.html"
+                                                  ; Player Address
+
+; DOS Trailer follows:
+Checksum             = 0001ACAD                   ; okay
+Unused               = 32434350                   ; PCC2
+RegStr1              = "Stefan Reuther"
+RegStr2              = "Dresden, Germany"
+RegSum               = 00074E24                   ; okay
+
+PlayerLog
+  Player1            = 00000000
+  Player2            = 00000000
+  Player3            = 00000000
+  Player4            = 00000000
+  Player5            = 00000000
+  Player6            = 00000000
+  Player7            = 0001ACAC
+  Player8            = 00000000
+  Player9            = 00000000
+  Player10           = 00000000
+  Player11           = 00000000

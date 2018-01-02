@@ -1,0 +1,8 @@
+--- Message 2 (mgrep/test_vpa.db) ---
+TURN: 60
+(-x0001)<< Long Range Sensors >>
+Distress call and explosion
+detected from a starship at:
+( 2076 , 2366 )
+The name of the ship was the:
+Falken 005

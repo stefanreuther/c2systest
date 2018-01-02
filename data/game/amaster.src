@@ -1,0 +1,1077 @@
+%AMASTER
+
+# Program was written by Michal Korzycki and Piotr Winiarczyk.
+# (c) 1996-2005 Version 3.10g
+# Version release date : 2005-01-25 00:44
+#
+# This is universe master program for VGA-Planets game.
+# It is intended to be portable and open source.
+#
+# NEVER give unedited amaster.log file to players since there is random seed
+# inside. Universe is completly described by this number. Having this number
+# player can recreate it.
+#
+# Amaster is mainly designed for Phost games with Explore Map add-on
+# using AllowWraparoundMap = Yes. To change configuration parameters
+# in order to make Amaster create universe MASTER 3.02 compatibile, see
+# pmaster.cfg file from putil or pdk archive from http://www.phost.de
+#
+# Usage: amaster [options] [GameDirectory [RootDirectory]]
+# Valid options:
+#       -h      -- Print help and exit.
+#       -v      -- Print version and exit.
+#       -c      -- Print command line strings.
+#       -l      -- Don't create log file.
+#       -w      -- Don't create wormholes.
+#       -m      -- Don't create map.
+#       -u      -- Don't fix map checksums.
+#       -p      -- Show progress in map creation and validation or in test mode. (MSDOS only)
+#       -i      -- Display homeworld near-far planets, native cash or minerals info.
+#       -t      -- Display post mastering statistics.
+#       -g      -- Display Homeworlds finding algorithm statistics.
+#       -n      -- Display each player planet(s) IDs.
+#       -d      -- Display each player planets, bases and ships number.
+#       -r      -- Don't show total run time.
+#       -a      -- Don't write message to players.
+#       -s seed -- Use seed in random generator.
+#       -f name -- Use file name as config file.
+#                 ( One can make %AMASTER section in pconfig.src file )
+#       -z        -- Test mode ON. Tests provided map or configuration.
+#       -y number -- Number of tests in test mode. Default is 50.
+#       -x number -- Number of planets displayed in test mode summary. Default is 20.
+#       -o ID     -- ID of one of the Homeworlds in test mode.
+#       -3        -- PHOST3 support. Create universe for PHOST3 game.
+#       -k name.pgm -- Use name.pgm file as map creation mask.
+#
+# Files needed by Amaster to create universe.
+#
+# To create universe one must place following files in GameDirectory or
+# RootDirectory: beamspec.dat, engspec.dat, hullspec.dat, torpspec.dat, 
+# truehull.dat, planet.nm, race.nm. The amaster.src should be placed in 
+# GameDirectory. When universe map is not created, the xyplan.dat should be 
+# present in GameDirectory or RootDirectory. Amaster will also try to read
+# pconfig.src from GameDirectory. When there is no pconfig.src file or
+# NumShips prameter is not set (Phost 3) number of ships is set to 500.
+#
+# Notes on test mode.
+#
+# Test mode is for checking maps or configuration. If Amaster is not
+# generating map and it is using user provided map it may happen that
+# same planets are choosen more often than others for Homeworlds.
+# Host person should avoid such situations because same player can find
+# this out and have advantage in game. If it happens tune Homeworld finding
+# algorithm or consider change of game design. Use -p option to show
+# progress in testing (works only on MSDOS platform). Using -o option one
+# can provide one or more Homeworlds IDs, and test how offen such IDs are
+# choosen and if so, which planets are choosen for Homeworlds too.
+# In test mode you can also specify -g or -t flags to get various
+# stastistic information about created universes. (new in 3.10)
+# One can also gather same statistical information (again -g -t options)
+# when Amaster creates maps or when ProvideHomeworld=Yes. In those cases
+# no information about choosen Homeworlds IDs is displayed, so -g or -t
+# option is obligatory.
+#
+# While displaying Map creation process symbols are used:
+#
+# '*' - map was created
+# '#' - finding stars not in WraparoundRectangle
+# '%' - finding stars with distance smaller than given in config
+# 'X' - checking and fixing planet X coordinates sum
+# 'Y' - checking and fixing planet Y coordinates sum
+#
+# While displaying Test Mode progress symbols are used:
+#
+# '+' - test succesfully completed
+# '=' - test completed but HW with ID set by -o option not found.
+# '-' - test not completed, too many iterations
+#
+# When displaying IDs of player planet(s) symbols are used:
+#
+# 'H' - planet is a Homeworld
+# 'B' - planet has base
+#
+# Homeworld finding algoritm parameters (new in version 3.0).
+#
+# MaxMapCounter    - How many times map can be created.
+# MaxPlanetCounter - How many times planets minerals/natives are created
+#                    for each map.
+# MaxHWCounter     - How many times Amaster try to find homeworld for
+#                    for each map and each planets setting.
+#
+# Maximal number of try to find homeworlds is
+# MaxMapCounter*MaxPlanetCounter*MaxHWCounter.
+# During that search, map is created MaxMapCounter times,
+# planets are created MaxMapCounter*MaxPlanetCounter.
+#
+
+MaxMapCounter     = 20
+MaxPlanetCounter  = 100
+MaxHWCounter      = 50000
+
+# All parameters described as 'arrayzed' can be in two forms.
+# Short eg. RaceIsPlaying = Yes
+# It means that 'Yes' is valid for all races.
+# Long  eg. RaceIsPlaying = Yes,No,Yes,Yes,No,Yes,Yes,No,Yes,Yes,Yes
+# Each race must have individual setting.
+#
+# RaceIsPlaying is arrayzed.
+#              1    2    3    4    5    6    7    8    9    10   11
+RaceIsPlaying= yes,yes,yes,yes,yes,yes,yes,yes,yes,yes,yes
+
+#
+# All 9 parameters (except BorderWidth) listed below have exactly
+# same meaning as in Phost pconfig.src file. Look into Phost documentation
+# for more deep explanation. Amaster sametimes uses them for
+# other purposes. 
+PlayerRace              = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
+MapTruehullByPlayerRace = Yes
+
+# If AllowWraparoundMap is Yes  - when placing the Homeworlds the distance
+# "across" the border of the map will also be taken in consideration.
+# BorderWidth is a historic parameter when there was no wrap map
+# implemented in Phost and sometimes hosts use 'wrap border zone'
+# for same reasons. BorderWidth set to 0 is a recommended choice for
+# Phost 3.2 or newer.
+
+AllowWraparoundMap  = Yes
+WraparoundRectangle = 1000, 1000, 3000, 3000
+BorderWidth         = 0
+
+# Set this parameter to Yes if the Crystal homeworld is to have a temperature
+# of 100 rather than 50, as for the other homeworlds.
+# All 4 below parameters are used only when AdjustPopulation = Yes.
+CrystalsPreferDeserts   = Yes
+CrystalSinTempBehavior  = No
+ClimateLimitsPopulation = Yes
+MaxColTempSlope         = 1000
+
+# Set the initial passwords for each player. Passwords may be up to 10
+# characters in length. To indicate that no password should be used, set
+# the password to 'none'.
+Password1=none
+Password2=none
+Password3=none
+Password4=none
+Password5=none
+Password6=none
+Password7=none
+Password8=none
+Password9=none
+Password10=none
+Password11=none
+
+# Here one select the mineral composition of non-homeworld planets.
+# The 8 elements of the PlanetSurfaceRanges array is interpreted as follows:
+#            Nmin, Tmin, Dmin, Mmin, Nmax, Tmax, Dmax, Mmax
+# The actual amount of a mineral found on a planet's surface will be
+# randomly distributed between 'min' and 'max' limits. For example, if
+# Nmin=0 and Nmax=1000, then each planet's surface will have anywhere
+# from 0 to 1000 KT of Neutronium.
+#
+# MASTER 3.02 - Random normal settings.
+PlanetSurfaceRanges= 0, 0, 0, 0, 250, 50, 40, 25
+
+# Density is also specified as Nmin, Tmin, Dmin, Mmin, Nmax, Tmax, Dmax, Mmax.
+# Note that density must be in the range 1 through 100.
+#
+# MASTER 3.02 - Random normal settings.
+PlanetDensityRanges=10, 10, 10, 10, 100, 100, 100, 100
+
+# Selecting the composition of minerals in the core of planets is a bit more
+# complicated. You specify two sets of ranges, the "usual" range (umin-umax)
+# and the "alternate" range (amin-amax). Then, you specify the frequency
+# with which a given mineral will be chosen from the usual range. As before,
+# the PlanetCoreRangesUsual and PlanetCoreRangesAlternate parameters are
+# 8-element arrays in the form :
+#      Nmin, Tmin, Dmin, Mmin, Nmax, Tmax, Dmax, Mmax.
+#
+# For example, for Neutronium you set the usual range to (umin=100,
+# umax=1000) and the alternate range to (amin=2000, amax=10000). You set
+# the usual range frequency to 80%. Then, on 80% of the planets, the
+# amount of in-core Neutronium will be between 100 KT and 1000 KT. On the
+# remaining 20% of the planets, the amount of in-core Neutronium will be
+# between 2000 KT and 10000 KT.
+# MASTER 3.02 - Random normal settings.
+
+PlanetCoreRangesUsual     = 0, 0, 0, 0, 700, 500, 500, 200
+PlanetCoreRangesAlternate = 700, 500, 500, 200, 12000, 12000, 12000, 12000
+
+# Percent chance of usual range
+PlanetCoreUsualFrequency  = 75, 80, 85, 85
+
+# Now you select the characteristics of natives on planets. The
+# NativesOnPlanetFrequency parameter indicates the percentage of planets that
+# are to have natives. For example, setting it to 60 means that 60% of
+# the planets will have natives (this is the default MASTER 3.02 setting).
+NativesOnPlanetFrequency  = 60
+
+# The NativeTypeFrequencies array allows you to control the relative
+# frequency of the different kinds of natives (Bovinoid, Humanoid, etc.)
+# Each element of this 9-element array must be a number from 0 to 100 that
+# is only meaningful in comparison to the other numbers. Two elements from
+# this array indicate the relative frequency of occurrence of the corresponding
+# native types. For example, if element 1 (Humanoids) is 10 and element 2
+# (Bovinoids) is 20, then there will be twice as many planets with Bovinoids
+# as Humanoids.
+# Setting one item to 0 means that this native type will never appear.
+# Default MASTER 3.02 behavior is equal probability for all native types
+# except for Humanoids and Siliconoids which are half as likely as the others.
+# The native types are coded:
+#  1 -- Humanoid
+#  2 -- Bovinoid
+#  3 -- Reptilian
+#  4 -- Avian
+#  5 -- Amorphous
+#  6 -- Insectoid
+#  7 -- Amphibian
+#  8 -- Ghipsoldal
+#  9 -- Siliconoid
+#
+#                      1   2   3   4   5   6   7   8   9
+NativeTypeFrequencies=50, 50, 50, 50, 100, 50, 50, 50, 50
+
+# The NativeGovFrequencies array has the same format as NativeTypeFrequencies
+# except that it applies to government types.
+# Default MASTER 3.02 behavior is equal probability for all native governments
+# except for Anarchy and Unity which are half as likely as the others.
+# The government types are coded :
+#  1 -- Anarchy
+#  2 -- Pre-tribal
+#  3 -- Early Tribal
+#  4 -- Tribal
+#  5 -- Feudal
+#  6 -- Monarchy
+#  7 -- Representative
+#  8 -- Participatory
+#  9 -- Unity
+#
+#                     1   2   3   4   5   6   7   8   9
+NativeGovFrequencies=25, 50, 50, 50, 75, 50, 50, 50, 25
+
+# The NativeRange has two elements, min and max, which indicate the
+# minimum number and maximum number of natives for planets that have
+# natives. The actual number of natives is chosen uniformly from this range.
+# Note that these are thousands, the actual native population is 1000 times
+# bigger. Default MASTER 3.02 behavior (approximate).
+NativeRange=2, 9000
+
+# Both parameters control starting happyness of natives and colonists
+# in the moment of universe creation. If not defined later natives
+# and colonist will have such happiness on all planets.
+DefaultNativesHappy  = 80
+DefaultColonistHappy = 80
+
+# Set the number of planets that each race will start with. Configurable for
+# each race. Default is 1, giving player only Homeworld planet.
+# When OwnedPlanets=0 and FreeShips=Yes all ships for given player are
+# generated in the same random point of universe.
+#
+# OwnedPlanets is arrayzed
+#              1    2    3    4    5    6    7    8    9    10   11
+OwnedPlanets=  1
+
+# Set the number of bases that each race will start with. Configurable for
+# each race. Placed first on the Homeworlds and successively on the next
+# planets.
+#
+# OwnedBases is arrayzed
+#              1    2    3    4    5    6    7    8    9    10   11
+OwnedBases   = 1
+
+# Initialy bases are created on planets nearest Homeworlds, but
+# if needed they can be randomly moved to other player planets.
+# BaseHopsNumber parameter describes number of trys of such moves.
+BaseHopsNumber = 0
+
+# BaseHopsFactor parameter sets probability of movement for base.
+# Once base for movment is choosen and destanation planet is known
+# there is certain probability to move base.
+# Probablility = exp ( - DistanceToNewPlanet/BaseHopsFactor)
+# When DistanceToNewPlanet = BaseHopsFactor
+# Probablility = exp ( - 1 ) = 36.8 %
+# Bigger values make bases hops ( jumps ) more frequent.
+#
+# Same numerical examples for BaseHopsFactor = 100
+#
+# DistanceToNewPlanet  Probability
+#    ( LY )              ( % )
+#          10             90.5
+#          50             60.7
+#         100             36.8
+#         150             22.3
+#         200             13.5
+#
+BaseHopsFactor = 100
+
+# One can limit distance from bases to Homeworld. BaseHopsLimit is minimal and
+# maximal distance for planets to have base. BaseHopsLimit is in percentage
+# of distance to the most distant planet owned by race (MaxPlanetDistance).
+# Setting BaseHopsLimit = 0, 100 allow all player planets to have bases,
+# while BaseHopsLimit = 25, 50 allows only planets nearer then
+# MaxPlanetDistance* 50 /100.0 LY and more than
+# MaxPlanetDistance* 25 /100.0 LY from Homeworld.
+# Since BaseHopsLimit works only with base reassigment algorithm it is
+# possible to have bases outside this limit. They were not moved during
+# reassigment phase or reassigment was not done at all (BaseHopsNumber = 0).
+BaseHopsLimit  = 0, 100
+
+# While planets with bases are no longer the most closest to Homeword
+# it is imposible to say which base will be assigned to which planet.
+# See Planet1,..,Planet99 and HomePlanet1,..,HomePlanet99 parameters.
+# When BindPlanetsToBases = Yes, Planet1 will be bind with nearest
+# to Homeworld base, Planet2 to second nearest base... Next nearest
+# non-base planet will be assigned to next free PlanetXX parameter,
+# and so on.
+#
+# Example:
+# OwnedPlanets = 7
+# OwnedBases   = 3
+#
+# Shortly we describe Planet1 as P1, base 1 as B1
+# PH  - Planet with Homeworld, BH - Homeworld base
+# [ ] - No planets outside this range can have base.
+#       BaseHopsLimit defines those limits.
+#
+# 1. BaseHopsNumber=0 - no base reassigment
+#
+#         [           ]
+#    PH P1 P2 P3 P4 P5 P6
+#    BH B1 B2
+#    +-------------------------------->
+#    0                 Distance to Homeworld
+#
+# 2. BaseHopsNumber not 0 - base reassigment
+#    BindPlanetsToBases = No
+#
+#         [           ]
+#    PH P1 P2 P3 P4 P5 P6
+#    BH    B1    B2
+#    +-------------------------------->
+#    0                 Distance to Homeworld
+#
+#    There is no way to tell which planet will have base.
+#
+# 3. BaseHopsNumber not 0 - base reassigment
+#    BindPlanetsToBases = Yes
+#
+#         [           ]
+#    PH P3 P1 P4 P2 P5 P6
+#    BH    B1    B2
+#    +-------------------------------->
+#    0                 Distance to Homeworld
+#
+#    Now nearest to Homeworld base will have Planet1 settings
+#    base 2 will have Planet2 settings, then first to Homeworld
+#    non-base planet will get first not used planet number - Planet3.
+#    Next one will be Planet4 and the last one Planet5.
+#
+# 4. BaseHopsNumber not 0 - base reassigment
+#    BindPlanetsToBases = Yes
+#
+#         [           ]
+#    PH P1 P3 P4 P2 P5 P6
+#    BH B1       B2
+#    +-------------------------------->
+#    0                 Distance to Homeworld
+#
+#    Base 1 is outside BaseHopsLimit. It may happen when base 1
+#    did not made any hops. One or more hops will bring base 1 into
+#    BaseHopsLimit range.
+#
+
+BindPlanetsToBases = Yes
+
+#
+# Base reassigment procedure:
+# Start- done once for one player:
+#  * Find possible planets for bases considering BaseHopsLimit.
+# Main loop
+#  * Randomly find player base (not Homeworld).
+#  * Find player planet with no base and allowed for base.
+#  * Measure distance - DistanceToNewPlanet.
+#  * Compute Probability.
+#  * If Random(100) < Probability move base to new planet else do nothing.
+#  * Repeat all BaseHopsNumber times for each player.
+
+# Set the natives to be found at planets that player will start with.
+# First number is native type - NatType, second natives government
+# type - GovType, then natives number in clans - NatClans,
+# then natives happines - NatHappy, and finaly natives tax - NatTax.
+# Planet1 - means the nearest planet to  Homeworld, Planet2 - second
+# non-homeworld planet etc.. For native races codes look at the
+# NativeTypeFrequencies table. Set 0 for no natives, -1 to randomly set
+# natives type, -2 to don't change natives on planet (in case of no natives,
+# there will be no natives on this planet, note the difference to 0).
+# If natives type is set to value in range 1 - 9 and GovType is set
+# to -1 natives government will be choosen randomly.
+# One can define government by setting value from range 1 to 9,
+# see NativeGovFrequencies table for NatType codes.
+# If NatClans is set to -1 number of natives will be set randomly,
+# else NatClans will be initial natives population.
+# NatHappy = -1 will make natives happiness be set to DefaultNativesHappy.
+# NatTax  = -1 will set natives tax to 0 (default value). All randomly
+# set values will be choosen with universe default distribusions.
+# New function of Planet1.. parameters is introduced in version 3.9
+# Valid entries Planet1, Planet2,... ,Planet99
+#
+# Example:
+#
+# OwnedPlanets = 3
+# OwnedBases   = 1
+# Planet1      = 4, -1, 60000, 80, 0
+# Planet2      = 0,  0,     0,  0, 0
+#
+# Players will get at start 3 planets, one with homeworld base,
+# second with Avian natives with government randomly choosen having
+# 6000000 natives on planet with happiness of 80% and taxes set to 0.
+# Third planet will have no natives.
+#
+# End of example.
+#
+#        NatType, GovType, NatClans, NatHappy, NatTax
+Planet1=      -2,       0,       0,         0,      0
+Planet2=      -2,       0,       0,         0,      0
+
+#
+# HomePlanet1, ... , HomePlanet99 parameters describe starting planets
+# number of clans, mines, factories, defence, cash, supplies,
+# colonist happines, colonist tax. New in version 3.7
+# HomePlanet1 is a planet nearest to Homeworld, etc.
+# DefaultHomePlanet defines default starting planet parameters.
+#
+#               Clans Mines Fac. Defence  Cash Supp Happy Tax
+HomePlanet1   = 1000,  10,  100,    5,     0,   0,   80,   0
+HomePlanet2   = 1000,  10,  100,    5,     0,   0,   80,   0
+
+#                   Clans Mines Fac. Defence  Cash Supp Happy Tax
+DefaultHomePlanet = 1000,  10,  100,    5,     0,   0,   80,   0
+
+# This parameter sets on or off checking of Amorphous natives on
+# HomePlanets. If set to Yes and Amorphous are present they are deleted.
+NoAmorphousOnHomePlanets = No
+
+# Setting AllOwnedPlanetsTheSame to Yes will make Amaster search for
+# first player that has HomePlanet #1 (the closest to Homeworld).
+# Then this planet is copied to next player HomePlanet #1, and so on
+# till last player with HomePlanet #1 is processed. Then Amaster will look
+# for HomePlanet #2 and whole procedure is repeated. All HomePlanets
+# are processed this way. Summing up, all HomePlanet #1 for all players
+# are the same, all HomePlanet #2 for all players are the same...
+#
+AllOwnedPlanetsTheSame  = No
+
+# If AllPlayerPlanetsTheSame = Yes HomePlanet #1 is copied to Home Planet #2,
+# Home Planet #3 etc. Such procedure is done for each player.
+# As result each player has same planets, but planets owned by different
+# players can be different.
+AllPlayerPlanetsTheSame = No
+
+# Setting AllPlayerPlanetsTheSame = Yes AND AllOwnedPlanetsTheSame = Yes
+# will make HomePlanets globally the same. Use Planet1 and HomePlanet1
+# to control same of the settings of those planets.
+
+#
+# New in version 3.5
+# Homeworld have temperature 50 F (or 100 F for Tholians/Crystals).
+# If BioSupport = No temperature is random number from range 0 to 100.
+# When BioSupport is on, temperature for normal planet is taken
+# from range PlanetsTempRange. For initially owned planets it is taken from
+# OwnedPlanetsTempRange. Probability of each temperature in that regions
+# can be not equal (see BioSupportLevel parameter).
+BioSupport          = Yes
+
+#
+# For BioSupportLevel=0 all temperatures from PlanetsTempRange or
+# OwnedPlanetsTempRange have equal probability.
+# As not normalized probability function P for temperature T Amaster uses :
+# P(T) = BioSupportLevel*sin(3.1415*(T-PlanetsTempRange[0])/TempRange)
+#        +(100-BioSupportLevel)
+# where TempRange = PlanetsTempRange[1]-PlanetsTempRange[0].
+# Bigger values gives more planets with temperature closer to mean.
+# Allowed values are from 0 to 100. Initialy owned planets temperatures
+# are given by this probability too. In this case
+# TempRange = OwnedPlanetsTempRange[1]-OwnedPlanetsTempRange[0].
+BioSupportLevel     = 50
+
+#
+# Temperature range of normal planets when BioSupport = Yes
+PlanetsTempRange    = 0, 100
+
+#
+# Temperature range of initialy owned planets when BioSupport = Yes
+OwnedPlanetsTempRange = 15, 84
+
+#
+# If natives population is bigger than max population on planet
+# (due to temperature) adjust population to maximum allowed
+# for that temperature.
+AdjustPopulations   = Yes
+
+# Set the minimal distance between homeworlds - The Homeworlds will be placed
+# randomly on the map with at least HomeworldsRadius LY between them.
+# Large values (above 500 LY) can make it hard to find.
+HomeworldsRadius    = 100
+
+# HomeworldsRange is active when AllowWraparoundMap = No.
+# This parameter sets area where homeworlds can be located,
+# so preventing homeworlds to be to near universe border.
+# Default values are computed from WraparoundRectangle by adding
+# or subtracting HomeworldsRadius/2. Each race now got circle
+# of radius HomeworldsRadius/2 with planets to colonize.
+# Idea by Daniel Bruedigam.
+HomeworldsRange     = 1200, 1200, 2800, 2800
+
+# Host can turn off homeworld finding algorithm by setting
+# ProvideHomeworlds parameter to Yes. Homeworlds planets
+# Id's are taken from Homeworlds parameter in such case.
+# No mine, cash, or any other checking is done.
+# If race is not playing put 0 as homeworld planet id.
+ProvideHomeworlds = No
+
+#              1   2   3   4   5   6   7   8   9  10  11
+Homeworlds =   1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11
+
+
+# MASTER 3.02 - Very high homeworld population settings.
+#
+# HomeworldClans is arrayzed.
+#             1    2    3    4    5    6    7    8    9    10   11
+HomeworldClans=30000
+
+# MASTER 3.02 - Very high starting money.
+#
+# HomeworldCash is arrayzed.
+#              1    2    3    4    5    6    7    8    9    10   11
+HomeworldCash=15000
+
+
+# These arrays indicate the amount of minerals to place in the core of each
+# homeworld, and on the surface. Each array is indexed by race.
+#
+# MASTER 3.02 - Homeworlds extra rich settings.
+#
+# All HomeworldCore, HomeworldSurface and HomeworldDensity are arrayzed.
+#                    1     2     3     4     5     6     7     8     9     10    11
+HomeworldCoreN     = 4000
+HomeworldCoreT     = 2000
+HomeworldCoreD     = 3500
+HomeworldCoreM     = 1650
+
+HomeworldSurfaceN  = 2000
+HomeworldSurfaceT  = 300
+HomeworldSurfaceD  = 350
+HomeworldSurfaceM  = 150
+
+HomeworldDensityN  = 20
+HomeworldDensityT  = 20
+HomeworldDensityD  = 15
+HomeworldDensityM  = 95
+
+#
+#  Homeworld starting Mines, Factories, Defence, Supplies.
+#  HomeworldMines, HomeworldFactories, HomeworldDefence, HomeworldSupplies
+#  HomeworldColonistTax and HomeworldColonistHappy are arrayzed.
+#  New in version 3.7
+#
+#                        1     2     3     4     5     6     7     8     9     10    11
+HomeworldMines         = 100
+HomeworldFactories     = 150
+HomeworldDefence       = 100
+HomeworldSupplies      = 1000
+HomeworldColonistTax   = 7
+HomeworldColonistHappy = 80
+
+#
+# Bases control
+#
+# BaseFreeDefence, BaseFreeFighters are arrayzed
+#
+BaseFreeDefence            = 10
+BaseFreeFighters           = 20
+
+#
+# Setting one or more of below parameters to yes will make
+# free parts to be stored in homeworld base.
+# BaseFreeHulls, BaseFreeEngines, BaseFreeBeams and BaseFreeTorps
+# BaseFreeTorps are arrayzed.
+#
+# BaseFreeHulls = Yes
+# * 1  ship in race slot 1
+# * 1  ship in race slot 2
+#
+# BaseFreeEngines = Yes
+# * 4  Impulse Drive (StarDrive 1) engines
+# * 2  Dimetrans Drive (StarDrive 3) engines
+#
+# BaseFreeBeamss = Yes
+# * 8  Kill-O-Zap (X-Ray Laser) beams
+#
+# BaseFreeTorps = Yes
+# * 3  Fusion Bomb (Proton torp) tubes
+# * 20 Fusion Bomb (Proton torp) torpedoes
+#
+BaseFreeHulls              = Yes
+BaseFreeEngines            = Yes
+BaseFreeBeams              = Yes
+BaseFreeTorps              = Yes
+
+#
+# If AllBasesTheSame = Yes and more than one base is present,
+# all bases are like homeworld base, so can get free defense, fighters,
+# parts or tech levels.
+AllBasesTheSame            = No
+
+# When set to yes this parameter will make Amaster to change
+# non homeworld bases tech levels to 10 if natives on this planet
+# gives such tech levels.
+AdjustBasesTechs           = Yes
+
+# This array indicates the starting engine tech for each one of the Homeworlds.
+# Each element must be in the range 1 through 10.
+#
+# StartingEngineTech, StartingHullTech, StartingBeamTech,
+# StartingTubeTech are arrayzed.
+#                    1  2  3  4  5  6  7  8  9 10 11
+StartingEngineTech = 7
+StartingHullTech   = 1
+StartingBeamTech   = 1
+StartingTubeTech   = 1
+
+#
+# Free ships.
+# Ships are placed on orbit of Homeworld.
+# When FreeShipsOnBases = Yes each player bases will get same
+# free ships as Homeworld. FreeShipsOnBases is arrayized.
+FreeShips           = No
+FreeShipsOnBases    = No
+
+# This is number of ships on one base, so when FreeShipsOnBases=Yes
+# total number of player ships will be FreeShipsNumber * OwnedBases[player]
+# FreeShipsNumber is arrayized.
+FreeShipsNumber     = 2
+
+FreeShipsAllTheSame = No
+#
+# If FreeShipsAllTheSame = No each race will get ships in standard way
+# (one ship with first hull allowed for race, one with second allowed
+# hull and so on).
+# If FreeShipsAllTheSame = Yes all races get ships with below hull numbers.
+# For hull codes look to Phost doc, file hullfunc.htm, List of Hulls section.
+# 17 is 'LARGE DEEP SPACE FREIGHTER' or in PList 'HANSA CLASS LARGE TRANSPORT'.
+# Up to 20 hull ids can be defined in FreeShipsHull parameter.
+FreeShipsHull      = 17
+
+# More free ship control can be achived with ship templates and race ships 
+# parameters.
+#
+# Ship templates are defined with four numbers : hull number, engine, beam, 
+# tubes tech levels, number of beams, number of tubes.
+#  If value is unset or set to -1 FreeShipsHull, FreeShipsEngines, 
+# FreeShipsBeams, FreeShipsTubes value or maximal possible number of beams 
+# or tubes will be used.
+# Some examples:
+# Ship1 = 104,9,9,9,1,1
+# Ship2 = 105,1
+# Ship3 = -1,9,-1,7,-1,0
+#
+# RaceXXShipYY parameters partialy override FreeShipsHull or 
+# FreeShipsAllTheSame actions. RaceXXShipYY parameters has two modes. 
+# First mode is used to define ship with template number. 
+# Example : Race1Ship2 = Ship1
+# Exaplanation : Use ship template 1 (Ship1) as race 1 ship 2. So if 
+# FreeShipsAllTheSame = Yes and FreeShipsHull=17 and FreeShipsNumber = 4
+# race 1 will have 4 ships with hulls 17, 104, 17, 17
+# All other races will have hulls 17, 17, 17, 17
+# If FreeShipsHull=1,2,3 race 1 will have hulls 1, 104, 3, 1
+# All other races will have hulls 1, 2, 3, 1
+#
+# Second mode for RaceXXShipYY setting parameter is similar to ship definition 
+# in ship templates.
+# Example : Race1Ship2 = 100,2,-1,10,-1,2
+# Explanation : in 2nd ship of race 1 hull with id 100, engines of tech 2,
+# default beams tech level (value of FreeShipsBeams), torps of 10th tech, 
+# maximal number of beams allowed by hull and two torp tubes will be used.   
+# More examples of RaceXXShipYY parameters: 
+# Race1Ship1 = 56,1,2,3,4,5
+# Race1Ship2 = Ship1
+# Race2Ship1 = Ship2
+# Race2Ship2 = 56,1
+# Race2Ship3 = -1,1
+
+#
+# Default free ships equipment tech levels.
+#
+FreeShipsEngines   = 6
+FreeShipsBeams     = 6
+FreeShipsTubes     = 6
+
+#
+# Free ammo for ships (fighters or torpedos).
+#
+FreeShipsAmmo      = 20
+
+#
+# Engines are coded :
+#       PLIST                      STD LIST
+#       -------------------        -------------------
+#  1 -- Impulse Drive              StarDrive 1
+#  2 -- Linear Drive               StarDrive 2
+#  3 -- Dimetrans Drive            StarDrive 3
+#  4 -- Dimesexta Drive            SuperStarDrv 4
+#  5 -- Metagrav Drive             Nova Drive 5
+#  6 -- Enerpsi Drive              HeavyNova Drv 6
+#  7 -- Interuniversal Drive       Quantam Drive 7
+#  8 -- Improbability Drive        Hyper Drive 8
+#  9 -- Bistromatic Drive          Transwarp Drive
+#
+# Beams are coded :
+#       PLIST                      STD LIST
+#       -------------------        -------------------
+#  1 -- Laser Cannon               Laser
+#  2 -- Kill-O-Zap                 X-Ray Laser
+#  3 -- Desintegrator              Plasma Bolt
+#  4 -- Phaser                     Blaster
+#  5 -- Disruptor                  Positron Beam
+#  6 -- Electron Ram               Disruptor
+#  7 -- Ion Cannon                 Heavy Blaster
+#  8 -- Turbolaser Battery         Phaser
+#  9 -- Inpotron Cannon            Heavy Disruptor
+# 10 -- Multitraf Spiral           Heavy Phaser
+#
+# Torpedoes are coded :
+#       PLIST                      STD LIST
+#       -------------------        -------------------
+#  1 -- Space Rocket               Mark 1
+#  2 -- Fusion Bomb                Proton Torp
+#  3 -- Paralyso-Matic Bomb        Mark 2
+#  4 -- Initial Bomb               Gamma Bomb
+#  5 -- Photon Torp                Mark 3
+#  6 -- Graviton Bomb              Mark 4
+#  7 -- Arkon Bomb                 Mark 5
+#  8 -- Antimatter Bomb            Mark 6
+#  9 -- Katalysator Bomb           Mark 7
+# 10 -- Selphyr-Fataro-Dev.        Mark 8
+#
+
+#
+# Parameters used to make equal start for each race.
+#
+# Number of planets that Homeword should have near (NearSearchRadius)
+# and far (FarSearchRadius). This helps to make fair start for all.
+# No more 0 planet in 84 LY circle, and 10 by your enemy homeworld.
+#
+NearFarPlanetCheck = No
+
+# Minimal and maximal number of planets in 1 to NearSearchRadius LY
+# from Homeworld.
+NearPlanetsNo      = 1, 5
+NearSearchRadius   = 84
+
+# Minimal and maximal number of planets in 1 to FarSearchRadius LY
+# from Homeworld.
+FarPlanetsNo       = 5, 15
+FarSearchRadius    = 165
+
+#
+# Check for planets NativeCashSearchRadius LY or less from Homeworlds
+# with natives. Estimate income from natives. Tax rate is computed to make
+# natives happines change of 0.
+#
+# Formulas used:
+# NatTax = (5.0 + PlanetNatGovm/2.0 - sqrt ( PlanetNativePopulationClans/10000.0))/0.85
+# if (PlanetNatType==Avian) NatTax+=10.0/0.85
+# Cash = ((PlanetNativePopulationClans*PlanetNatGovm*NatTax+2500.0)/5000.0)
+# if (PlanetNatType==Insectoid) Cash*=2
+# if (PlanetNatType==Amorphous) Cash=0
+# NatCashFromOnePlanet=((Cash*NativeTaxRateForRace+50.0)/100.0)
+#
+# Starting from Amaster v3.0 NativeTaxRateForRace=100.0 for each race.
+# Starting point should be independent of race abilities.
+#
+NativeCashCheck = No
+
+#
+# Minimal and maximal cash from all planets to accept Homeworld.
+#
+NativeCash = 1000, 4000
+
+#
+# At what radius from Homeworld take planets with natives for cash computing.
+#
+NativeCashSearchRadius = 165
+
+#
+# Check for minerals expected to mine from planets in range MineSearchRadius.
+# For each mineral formulas are used (example counts Tritanium on one planet):
+#
+# MineRate = 200.0 * 100.0 * PlanetDensity(TRITANIUM)/10000.0
+# if (PlanetNatType==Reptilian) MineRate*=2.0
+# MineTurns= PlanetCore(TRITANIUM)/MineRate
+# if (MineTurns>MaxMineTurns) MineTurns=MaxMineTurns
+# MineTitaniumFromOnePlanet = MineTurns*MineRate
+#
+# '200.0' is a expected number of mineral mines on planet.
+# '100.0' is race mining rate, same argument as for NativeTaxRateForRace=100.0
+# MaxMineTurns is number of turns to count average mining.
+# MineTitaniumFromOnePlanet is sumed for all planets in range MineSearchRadius
+# and MineTitaniumAllPlanets/MaxMineTurns is compared to MineTritanium first
+# number (minimum) and MineTritanium second argument (maximum).
+#
+# Meteors and meteors showers are not counted.
+# MineTurns variable gives us resonable number of turns to dig out
+# all minerals from planet.
+#
+MineCheck        = No
+MineTritanium    = 150, 900
+MineDuranium     = 100, 600
+MineMolybdenium  = 50, 400
+MineSearchRadius = 165
+MaxMineTurns     = 20
+
+#
+# Wormhole generation routine is based upon code from:
+# PWORMGEN   Version 2.1
+# Author: Edward Winkelman
+#
+#  General wormholes generator settings.
+#
+CreateWormholes             = No
+WormholeNumber              = 25
+
+#
+#  Maximal number of iteration of wormhole generation code,
+#  this limit prevents endless loops.
+#
+MaxWormholesCounter         = 10000
+
+
+#
+# Amaster specific settings for wormhole generation procedure.
+# One can prevent wormholes being near homeworlds.
+# If NoWormholesNearHomeworlds = Yes, wormholes cannot be nearer than
+# MinWormHomeDistance to homeworlds.
+#
+NoWormholesNearHomeworlds   = Yes
+MinWormHomeDistance         = 100
+
+# If NoWormholesNearPlanets = Yes, wormholes cannot be nearer than
+# MinWormPlanetDistance to any planet.
+#
+NoWormholesNearPlanets      = Yes
+MinWormPlanetDistance       = 10
+
+#
+# Minimal distance between any two wormholes (exit and entrance is checked).
+#
+MinWormholesDistance        = 50
+
+#
+# Minimal length of wormhole (distance between exit and entrance).
+#
+MinWormholeLength           = 50
+
+
+#
+# PWORMGEN settings.
+#
+#
+# WormholeUniDirChance/100 is probability that wormhole is unidirectional
+# Valid values 0 - 100
+WormholeUniDirChance        = 20
+
+#
+# WormholeStartMoveChance/100, WormholeEndMoveChance/100 is probability
+# that wormhole start/end will move.
+# Valid values 0 - 100
+WormholeStartMoveChance     = 20
+WormholeEndMoveChance       = 20
+
+#
+# Wormhole start, end range
+#
+WormholeStartRange          =  1000, 1000, 3000, 3000
+WormholeEndRange            =  1000, 1000, 3000, 3000
+
+#
+# Wormhole instablility range.
+# Valid values 0 - 100, first value < second value
+WormholeInstabilityRange    =  0, 30
+
+#
+# Wormhole mass range.
+# Valid values 1 - 32000, first value < second value
+WormholeMassRange           =  1, 32000
+
+#
+# Map generation section
+#
+# Map generation algorithm:
+# INIT
+# * if PlanetsNumber != 500 randomly find IDs for planets inside
+#   WraparoundRectangle.
+# GENERATION
+# * For planets inside WraparoundRectangle X and Y is generated in region
+#   defined by WraparoundRectangle, exclusive. Planets that should be outside
+#   got X = WrapMaxX + WrapMinX/2 or X = WrapMinX/2 with 50% probability each.
+#   Y = WrapMaxY + WrapMinY/2 or Y = WrapMinY/2 with 50% probability each.
+# TESTS
+# * For planets inside WraparoundRectangle check if X or Y are not in
+#   WraparoundRectangle range. For planets outside check if they
+#   are outside. Fix if needed.
+# * Check if any two planets are less than PlanetsMinDistance, fix it.
+#   Ignore planets outside WraparoundRectangle.
+# if FixMapChecksums == yes
+# {
+#  * Check X coordinates sum of all planets. If not equal 0xf3d19 fix it.
+#  * Check Y coordinates sum of all planets. If not equal 0xf4c89 fix it.
+# }
+# * Try again all TESTS. If all ok, map is ready.
+#
+# Fix X and Y checksumes routine is based upon code from:
+# Fix map checksums
+# by Roger Burton West <roger@firedrake.demon.co.uk>
+# Written in c-- in 1997
+#
+# Invoking Amaster with -m option will prevent Amaster from
+# crating map even if CreateMap = Yes.
+# Amaster can read PGM (Portable Grayscale Map) files via -k filename option.
+# This PGM file is used as mask for map creation. Each color represents
+# probablity that if X and Y is randomly choosen the planet will have those 
+# X and Y. PGM file width and heigth are scaled to WraparoundRectangle values.
+# The map creation process using mask file can be disturbed when
+# FixMapChecksums is on. Amaster will display warning in such situation.
+# To achive desire map shape invoke Amster with -u option.
+# The example of map shape file is in config directory of distribution.
+# Copy face.pgm file to game directory and run amaster:
+#    amaster -u -k face.pgm game_dir
+# To create map mask PGM file use this color to probability table :
+#        Color   "0" - black -   0% probability for this X,Y
+#        Color "128" - gray  -  50% probability for this X,Y 
+#        Color "255" - white - 100% probability for this X,Y
+# All other gray scale values can be used too.
+#
+CreateMap                  = Yes
+
+# If 2 planets have distance smaller than PlanetsMinDistance
+# one planet is moved.
+#
+PlanetsMinDistance         = 6
+
+#
+# Amaster 3.9d can create maps with less than 500 planets. Simply same of
+# the planets are created outside WraparoundRectangle.
+# When map is not created by Amaster PlanetsNumber is determined from
+# map file, overwriting value defined in config file.
+PlanetsNumber              = 500
+
+# Early VGA-Planets program requires that sum of all planets X
+# coordinate is 0xf3d19. Setting FixMapChecksums to Yes makes Amaster
+# to generate maps with X sum of 0xf3d19 and additionaly Y sum of 0xf4c89.
+# Since maps with or without such sums are equal, maps with good X and Y
+# sums are generated as default. This option works also for maps with
+# PlanetsNumber less than 500.
+# Invoking Amaster with -u option will prevent Amaster from
+# fixing map checksums map even if FixMapChecksums = Yes.
+FixMapChecksums            = No
+
+#
+#  Ion Storms creation section
+#
+#  Ion storms are THost specific. Master program found on THost site
+#  does not generate ion storms on universe creation.
+#  They start to exist during game. During first few turns
+#  they are generated with very small voltages (harmless), but
+#  as game continues they can be introduced to universe being
+#  more dangerous. Ion storm information in stored in grey.hst file.
+#  Basic ion storm generator is implemented in Amaster v3.6
+CreateIonStorms            = No
+
+#
+#  Number of ion storms created by Amaster.
+#
+IonStormsNumber            = 5
+
+#
+# Starting X and Y of ion storm center are in range IonStormsCenterRange.
+# Heading parameter is choose randomly from range 0 to 359.
+#
+IonStormsCenterRange       = 1000, 1000, 3000, 3000
+
+#
+# Initial ranges for ion storms voltage and radius.
+#
+IonStormsVoltageRange      = 1, 100
+IonStormsRadiusRange       = 10, 150
+
+# If NoIonStormsNearHomeworlds = Yes, ion storms center cannot
+# be nearer than MinIonStormsHomeDistance to any homeworld.
+
+NoIonStormsNearHomeworlds  = Yes
+MinIonStormsHomeDistance   = 150
+
+#
+#   Version history.
+#
+#   below v0.96 written by Michal Korzycki
+#
+#    v0.98 Rewritten to C from C++.
+#
+#    v1.0  New config reader.
+#          Near far check.
+#          Natives cash check.
+#
+#    v1.1  Random seed control.
+#          Homeworld search progress display.
+#
+#    v1.2  Wormhole generator.
+#          Map generator and validator.
+#
+#    v2.0  Minerals check.
+#          Portability.
+#
+#    v2.1  Near, Far search radius.
+#          2 bugs fixed in config reader.
+#
+#    v2.2  Statistics: -t option.
+#
+#    v2.3  Freeships.
+#
+#    v2.4  Base Control.
+#          AuxData saved.
+#
+#    v2.5  2 bugs found by Degi. Thanks.
+#          Free ammo for free ships.
+#          All HW tech levels can be set.
+#
+#    v3.0  New fast homeworld search algoritm. Idea by Degi.
+#
+#    v3.1  Homeworld density parameters, statistic improved.
+#
+#    v3.2  Parameters of mineral ranges can be fully configured.
+#
+#    v3.3  Same minor bugs.
+#          Config parameters are range checked.
+#          More statistic.
+#
+#    v3.4  Few bugs corrected.
+#          New wormhole generator parameters.
+#
+#    v3.5  BioSupport procedure changed.
+#
+#    v3.6  Ion Storms for THost.
+#
+#    v3.7  Better Homeworld and Homeplanets control.
+#
+#    v3.8  Up to 100 Homeplanets, host can pick Homeworlds.
+#          Many small changes.
+#
+#    v3.9  New format of PlanetXX parameters. More bases control.
+#          Maps with less than 500 planets.
+#
+#    v3.10 32-bit random number generator.
+#          Test mode for testing maps and configurations.
+#          PHOST4 support.
+#          Map creation mask PGM file can be used.
+#          Better free ships control  
+#
+

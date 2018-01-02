@@ -1,0 +1,319 @@
+#
+#  PHost 4 Configuration File -- Simple Version
+#
+#  This is a simple configuration file for starters. It contains only
+#  the required parameters; all the little "unimportant" ones were left
+#  out.
+#
+#  This configures a "standard" game with PBP build queue, all PHost
+#  features on (except remote control which is confusing to many
+#  beginners). The choice of battle type is done with the shiplist.txt
+#  file.
+#
+#  This file does not contain a %PCONTROL section; add one if you wish
+#  to have add-ons in your game. "complete.src" contains a pcontrol
+#  section which you can copy.
+#
+
+% PHOST
+
+#
+#  Overall game characteristics
+#
+
+  GameName                        = Titan 6
+  AllowRegisteredFunctions        = Yes
+  ScoringMethod                   = Compatible
+  NumShips                        = 500
+
+  AllowPlayerMessages             = Yes
+  AllowAnonymousMessages          = Yes
+
+  CPEnableGive                    = Yes
+  CPEnableAllies                  = Yes
+  CPEnableRaceName                = Yes
+  CPEnableRemote                  = No
+
+# WraparoundRectangle is only used when AllowWraparoundMap is Yes.
+# On a "flat" map, the map is as big as it is.
+  AllowWraparoundMap              = No
+  WraparoundRectangle             = 1000,1000,3000,3000
+
+  RoundGravityWells               = Yes
+
+#
+#  Player Preferences
+#
+#  Players can change these using CP commands. You can turn off the
+#  "Language" command if you only have the plangeng.hst language file.
+#  In "Language", the first element is the Host's choice of language.
+#  All other settings are "No" (conservative defaults that work with
+#  all clients).
+#
+
+  Language                        = English,English,English,English,English,English,English,English,English,English,English,English
+  AllowMoreThan50Targets          = No,No,No,No,No,No,No,No,No,No,No
+  FilterPlayerMessages            = No,No,No,No,No,No,No,No,No,No,No
+  AllowMoreThan500Minefields      = No,No,No,No,No,No,No,No,No,No,No
+
+  CPEnableLanguage                = Yes
+
+#
+#  Minefields
+#
+
+## General
+
+  AllowMinefields                 = Yes
+  AllowWebMines                   = Yes
+  MineDecayRate                   = 5
+  MaximumMinefieldRadius          = 150
+  CPNumMinefields                 = 500
+
+## Movement through Mines
+
+  MineHitOdds                     = 1
+  WebMineHitOdds                  = 5
+  MineHitOddsWhenCloakedX10       = 5
+  HullTechNotSlowedByMines        = 7
+
+## Mine Sweeping
+
+  MineScanRange                   = 250
+  AllowMinesDestroyMines          = Yes
+
+# Note that because Mine Sweeping happens after decay in PHost, the sweep
+# ranges must be larger than in THost to yield roughly the same results.
+  MineSweepRate                   = 4
+  MineSweepRange                  = 5
+  WebMineSweepRate                = 3
+  WebMineSweepRange               = 3
+  FighterSweepRate                = 0,0,0,0,0,0,0,0,0,0,20
+  FighterSweepRange               = 0,0,0,0,0,0,0,0,0,0,100
+  AllowColoniesSweepWebs          = No
+
+### Ion Storms
+
+  IonStormActivity                = 5
+  IonStormsHideMines              = Yes
+
+#
+#  Planets (Production)
+#
+
+  RaceMiningRate                  = 70,200,100,100,100,100,100,100,100,100,100
+  ProductionRate                  = 100,100,100,100,100,100,100,100,100,100,100
+
+  StructureDecayPerTurn           = 1
+  StructureDecayOnUnowned         = 1
+
+  ColonistTaxRate                 = 200,100,100,100,100,100,100,100,100,100,100
+  MaxPlanetaryIncome              = 6000
+
+  ClimateLimitsPopulation         = Yes
+  AllowEatingSupplies             = Yes
+  ClimateDeathRate                = 3
+
+  BorgAssimilationRate            = 100
+
+#
+#  Planets (Combat)
+#
+
+  GroundKillFactor                = 1,30,1,15,1,1,1,1,1,1,1
+  GroundDefenseFactor             = 1,10,1,5,1,1,1,1,1,1,1
+
+  FreeFighters                    = 0,0,0,0,0,0,0,10,0,0,0
+  AllowPlanetAttacks              = Yes
+
+#
+#  Ships (Building)
+#
+
+  AllowPriorityBuild              = Yes
+  BuildQueue                      = PBP
+  BuildChangeRelativePenalty      = 100
+  BuildPointReport                = Allies
+
+  RecycleRate                     = 75
+  AllowShipCloning                = Yes
+  ShipCloneCostRate               = 200,200,200,200,32767,200,32767,200,200,200,200
+
+## PBP Building
+  PBPCostPer100KT                 = 250
+  PBPMinimumCost                  = 500
+  PBPCloneCostRate                = 200
+
+## Ship Build Queue
+# (The SBQ parameters are ignored when you use a PBP queue. We just
+# show the defaults for a PAL queue.)
+  SBQBuildPALBoost                = 1
+  SBQNewBuildPALBoost             = 1
+  SBQPointsForAging               = 1200
+  SBQBuildChangePenalty           = 0
+  SBQBoostExpX100                 = 0
+
+## Acquiring PALs
+# The idea behind a PAL queue is that you have to destroy 2N kt mass
+# to be granted a N kt priority build.
+  PALDecayPerTurn                 = 0
+  PALPlayerRate                   = 100
+  PALCombatAggressor              = 0
+  PALAggressorPointsPer10KT       = 2
+  PALOpponentPointsPer10KT        = 2
+  PALAggressorKillPointsPer10KT   = 8
+  PALOpponentKillPointsPer10KT    = 8
+  PALCombatPlanetScaling          = 80
+  PALCombatBaseScaling            = 120
+  PALShipCapturePer10Crew         = 0
+  PALRecyclingPer10KT             = 10
+  PALBoardingPartyPer10Crew       = 0
+  PALGroundAttackPer100Clans      = 0
+  PALGloryDevice                  = 0
+  PALGloryDevicePer10KT           = 10
+  PALGloryDamagePer10KT           = 2
+  PALGloryKillPer10KT             = 8
+  PALImperialAssault              = 0
+  PALRGA                          = 0
+  PALPillage                      = 0
+  PALIncludesESB                  = No
+  PALShipMinekillPer10KT          = 4
+
+## Ships (Movement)
+
+  AllowNoFuelMovement             = No
+
+## Ships (Missions)
+  AllowBuildFighters              = No,No,No,No,No,No,No,No,Yes,Yes,Yes
+
+  AllowDeluxeSuperSpy             = Yes
+  AllowRebelGroundAttack          = Yes
+  AllowSuperRefit                 = Yes
+  AllowHiss                       = Yes
+
+  AllowExtendedMissions           = No
+  AllowBeamUpClans                = No
+  AllowBeamUpMultiple             = No
+
+## Cloak
+  CloakFailureRate                = 0
+  CloakFuelBurn                   = 5
+  DamageLevelForCloakFail         = 1
+  AllowCloakedShipsAttack         = Yes
+  AlternativeAntiCloak            = No
+  AntiCloakImmunity               = Yes,Yes,Yes,No,No,No,No,No,No,No,No
+
+## Rob
+  RobCloakedShips                 = No
+  RobFailureOdds                  = 1
+
+## Tow
+  AllowOneEngineTowing            = No
+  AllowBoardingParties            = Yes
+  TowedShipsBreakFree             = No
+  AllowTowCloakedShips            = No
+  AllowAlternativeTowing          = Yes
+
+## Scanners
+  ScanRange                       = 300
+  SensorRange                     = 250
+  DarkSenseRange                  = 200
+  ExtendedSensorSweep             = Yes
+
+# Ships (Combat)
+
+  AllowFedCombatBonus             = Yes
+
+#
+#   Wormholes
+#
+
+  AllowWormholes                  = Yes
+  WrmVoluntaryTravel              = Yes
+  WrmTravelCloaked                = No
+  WormholeUFOsStartAt             = 51
+
+% hullfunc
+
+Init = Default
+
+
+% phost
+
+AllowAlternativeCombat = No
+AllowEngineShieldBonus = No
+AllowESBonusAgainstPlanets = No
+BayLaunchInterval = 3
+BayRechargeBonus = 2
+BayRechargeRate = 52
+BeamFiringRange = 20000
+BeamHitBonus = 0
+BeamHitFighterCharge = 500
+BeamHitFighterRange = 100000
+BeamHitOdds = 100
+BeamHitShipCharge = 600
+BeamRechargeBonus = 0
+BeamRechargeRate = 8
+CloakedMineTravelSafeWarp = 2
+CloakMineOddsWarpBonusX100 = 5
+CrewKillScaling = 80
+DamageLevelForChunnelFail = 100
+EModBayRechargeBonus = 0,0,0,0
+EModBayRechargeRate = 1,2,3,4
+EModBeamHitBonus = 0,0,0,0
+EModBeamHitFighterCharge = 0,0,0,0
+EModBeamHitOdds = 0,0,0,0
+EModBeamRechargeBonus = 0,0,0,0
+EModBeamRechargeRate = 0,0,0,0
+EModCrewKillScaling = -5,-10,-15,-20
+EModEngineShieldBonusRate = 0,0,0,0
+EModExtraFighterBays = 0,0,0,0
+EModFighterBeamExplosive = 0,0,0,0
+EModFighterBeamKill = 0,0,0,0
+EModFighterMovementSpeed = 0,0,0,0
+EModHullDamageScaling = 0,0,0,0
+EModMaxFightersLaunched = 0,0,0,0
+EModPlanetaryTorpsPerTube = 0,0,0,0
+EModShieldDamageScaling = 0,0,0,0
+EModShieldKillScaling = 0,0,0,0
+EModStrikesPerFighter = 1,2,3,4
+EModTorpHitBonus = 0,0,0,0
+EModTorpHitOdds = 9,18,27,35
+EModTubeRechargeBonus = 0,0,0,0
+EModTubeRechargeRate = 1,2,3,8
+EngineShieldBonusRate = 0
+EPTrainingScale = 70
+ExactExperienceReports = Yes
+ExperienceLevelNames = Recruit,Soldier,Experienced,Elite,Ultra Elite
+ExperienceLevels = 750,1500,3000,6000
+ExperienceLimit = 9000
+ExtraFighterBays = 3,0,0,0,0,0,0,0,0,0,0
+FighterBeamExplosive = 2
+FighterBeamKill = 2
+FighterFiringRange = 3000
+FighterKillOdds = 20
+FighterMovementSpeed = 235
+FireOnAttackFighters = No 
+HullDamageScaling = 80
+MaxFightersLaunched = 19
+MaxShipsHissing = 10
+MeteorShowerOdds = 2
+MineTravelSafeWarp = 2
+PlanetaryTorpsPerTube = 3
+PlanetsHaveTubes = No
+RamScoopFuelPerLY = 2
+RGANeedsBeams = No
+ShieldDamageScaling = 80
+ShieldKillScaling = 0
+ShipMovementSpeed = 75
+StandoffDistance = 3000
+StrikesPerFighter = 7
+TorpFiringRange = 30000
+TorpHitBonus = 0
+TorpHitOdds = 65
+TowStrengthDistanceScale = 19
+TowStrengthEngineScale = 1
+TubeRechargeBonus = 0
+TubeRechargeRate = 45
+WrmScanRange = 150
+

@@ -1,0 +1,121 @@
+--- Message 1 (mgrep/test_trn.trn) ---
+FROM: Player 7
+TO: Player 1
+TURN: 3
+  <<< Universal Message >>>
+The Emperium wrote:
+> ZkkZZkkkkkZkkkZZzkkkKzzzzKKzKKkZ
+> ZZkkzzkkzZzzZkkZkkKkzKKKzzkzzz!
+
+You have spelt 'Hisssssssssssssss'
+slightly *w*rong.
+--- Message 2 (mgrep/test_trn.trn) ---
+FROM: Player 7
+TO: Player 2
+TURN: 3
+  <<< Universal Message >>>
+The Emperium wrote:
+> ZkkZZkkkkkZkkkZZzkkkKzzzzKKzKKkZ
+> ZZkkzzkkzZzzZkkZkkKkzKKKzzkzzz!
+
+You have spelt 'Hisssssssssssssss'
+slightly *w*rong.
+--- Message 3 (mgrep/test_trn.trn) ---
+FROM: Player 7
+TO: Player 3
+TURN: 3
+  <<< Universal Message >>>
+The Emperium wrote:
+> ZkkZZkkkkkZkkkZZzkkkKzzzzKKzKKkZ
+> ZZkkzzkkzZzzZkkZkkKkzKKKzzkzzz!
+
+You have spelt 'Hisssssssssssssss'
+slightly *w*rong.
+--- Message 4 (mgrep/test_trn.trn) ---
+FROM: Player 7
+TO: Player 4
+TURN: 3
+  <<< Universal Message >>>
+The Emperium wrote:
+> ZkkZZkkkkkZkkkZZzkkkKzzzzKKzKKkZ
+> ZZkkzzkkzZzzZkkZkkKkzKKKzzkzzz!
+
+You have spelt 'Hisssssssssssssss'
+slightly *w*rong.
+--- Message 5 (mgrep/test_trn.trn) ---
+FROM: Player 7
+TO: Player 5
+TURN: 3
+  <<< Universal Message >>>
+The Emperium wrote:
+> ZkkZZkkkkkZkkkZZzkkkKzzzzKKzKKkZ
+> ZZkkzzkkzZzzZkkZkkKkzKKKzzkzzz!
+
+You have spelt 'Hisssssssssssssss'
+slightly *w*rong.
+--- Message 6 (mgrep/test_trn.trn) ---
+FROM: Player 7
+TO: Player 6
+TURN: 3
+  <<< Universal Message >>>
+The Emperium wrote:
+> ZkkZZkkkkkZkkkZZzkkkKzzzzKKzKKkZ
+> ZZkkzzkkzZzzZkkZkkKkzKKKzzkzzz!
+
+You have spelt 'Hisssssssssssssss'
+slightly *w*rong.
+--- Message 7 (mgrep/test_trn.trn) ---
+FROM: Player 7
+TO: Player 7
+TURN: 3
+  <<< Universal Message >>>
+The Emperium wrote:
+> ZkkZZkkkkkZkkkZZzkkkKzzzzKKzKKkZ
+> ZZkkzzkkzZzzZkkZkkKkzKKKzzkzzz!
+
+You have spelt 'Hisssssssssssssss'
+slightly *w*rong.
+--- Message 8 (mgrep/test_trn.trn) ---
+FROM: Player 7
+TO: Player 8
+TURN: 3
+  <<< Universal Message >>>
+The Emperium wrote:
+> ZkkZZkkkkkZkkkZZzkkkKzzzzKKzKKkZ
+> ZZkkzzkkzZzzZkkZkkKkzKKKzzkzzz!
+
+You have spelt 'Hisssssssssssssss'
+slightly *w*rong.
+--- Message 9 (mgrep/test_trn.trn) ---
+FROM: Player 7
+TO: Player 9
+TURN: 3
+  <<< Universal Message >>>
+The Emperium wrote:
+> ZkkZZkkkkkZkkkZZzkkkKzzzzKKzKKkZ
+> ZZkkzzkkzZzzZkkZkkKkzKKKzzkzzz!
+
+You have spelt 'Hisssssssssssssss'
+slightly *w*rong.
+--- Message 10 (mgrep/test_trn.trn) ---
+FROM: Player 7
+TO: Player 10
+TURN: 3
+  <<< Universal Message >>>
+The Emperium wrote:
+> ZkkZZkkkkkZkkkZZzkkkKzzzzKKzKKkZ
+> ZZkkzzkkzZzzZkkZkkKkzKKKzzkzzz!
+
+You have spelt 'Hisssssssssssssss'
+slightly *w*rong.
+--- Message 11 (mgrep/test_trn.trn) ---
+FROM: Player 7
+TO: Player 11
+TURN: 3
+  <<< Universal Message >>>
+The Emperium wrote:
+> ZkkZZkkkkkZkkkZZzkkkKzzzzKKzKKkZ
+> ZZkkzzkkzZzzZkkZkkKkzKKKzzkzzz!
+
+You have spelt 'Hisssssssssssssss'
+slightly *w*rong.

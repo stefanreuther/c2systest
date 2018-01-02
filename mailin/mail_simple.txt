@@ -1,0 +1,5 @@
+From: user <user@host>
+To: host@localhost
+Subject: whatever
+
+Some text here.

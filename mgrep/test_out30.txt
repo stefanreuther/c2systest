@@ -1,0 +1,14 @@
+--- Message 3 (mgrep/test_out30.dat) ---
+TO: player 1
+<<< VPA Data Transmission >>>
+
+OBJECT: Mine field 1
+DATA: -513736690
+oeaanpkabllahaaaopiaaaaabaaa
+--- Message 4 (mgrep/test_out30.dat) ---
+TO: player 5
+<<< VPA Data Transmission >>>
+
+OBJECT: Mine field 1
+DATA: 560005134
+oeaanpkabllahaaaopiaaaaabaaa

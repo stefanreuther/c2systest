@@ -1,0 +1,15 @@
+--- Message 5 (mgrep/test_rst.rst) ---
+TURN: 1
+(-h000) PHOST v4.1h
+HUL=9D28CD23
+ENG=0E2AC622
+BEA=1DF01C66
+TOR=4ADE2A8D
+TRU=CF78585D
+PXY=2D9D3481
+CFG=27C788DF
+NAM=91DFABD3
+
+The above information is for use by
+external player utilities and can
+be safely ignored.

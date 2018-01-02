@@ -1,0 +1,13 @@
+% score
+description=PTScore Used
+score2=20330
+score6=19551
+score1=14277
+score8=11816
+score4=11585
+score10=11585
+score5=10362
+score11=8742
+score9=8316
+score7=8316
+score3=8316
