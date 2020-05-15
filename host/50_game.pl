@@ -332,7 +332,7 @@ test 'host/50_game/tools', sub {
     conn_call($db, 'hmset', 'prog:tool:prog:x1', kind => 'xk', description => 'text one');
     conn_call($db, 'hmset', 'prog:tool:prog:x2', kind => 'xk', description => 'text two');
     conn_call($db, 'hmset', 'prog:tool:prog:y',  kind => 'yk', description => 'text three');
-    conn_call($db, 'sadd', 'prog:tool:list', qw(x1 x2 y));
+    conn_call($db, 'sadd', 'prog:tool:list', $_) foreach qw(x1 x2 y);
 
     # Create a game
     assert_equals conn_call($hc, qw(newgame)), 1;
@@ -345,7 +345,8 @@ test 'host/50_game/tools', sub {
     assert_equals conn_call($hc, qw(gameaddtool 1 y)), 1;
 
     # List tools; must be both
-    my @list = conn_call_list_of_hash($hc, qw(gamelstools 1));
+    # FIXME: the list is not guaranteed to be sorted - should it?
+    my @list = sort {$a->{id} cmp $b->{id}} conn_call_list_of_hash($hc, qw(gamelstools 1));
     assert_equals scalar(@list), 2;
     assert_equals $list[0]{id}, 'x1';
     assert_equals $list[0]{description}, 'text one';
@@ -358,7 +359,7 @@ test 'host/50_game/tools', sub {
     assert_equals conn_call($hc, qw(gameaddtool 1 x2)), 1;
 
     # List tools; must be x2 and y
-    @list = conn_call_list_of_hash($hc, qw(gamelstools 1));
+    @list = sort {$a->{id} cmp $b->{id}} conn_call_list_of_hash($hc, qw(gamelstools 1));
     assert_equals scalar(@list), 2;
     assert_equals $list[0]{id}, 'x2';
     assert_equals $list[0]{description}, 'text two';
@@ -481,7 +482,8 @@ sub add_default_tools {
     conn_call($db, qw(set prog:host:default H));
     conn_call($db, qw(set prog:master:default M));
     conn_call($db, qw(set prog:sl:default S));
-    conn_call($db, qw(sadd prog:host:list H P));
+    conn_call($db, qw(sadd prog:host:list H));
+    conn_call($db, qw(sadd prog:host:list P));
     conn_call($db, qw(sadd prog:master:list M));
     conn_call($db, qw(sadd prog:dl:list S));
 }
@@ -491,7 +493,7 @@ sub add_complex_game {
 
     # Add pseudo-users (just to survive a "user exists" check)
     my $db = setup_connect_app($setup, 'db');
-    conn_call($db, qw(sadd user:all a b c d e f z));
+    conn_call($db, qw(sadd user:all), $_) foreach qw(a b c d e f z);
 
     # Add game
     my $hc = setup_connect_app($setup, 'host');

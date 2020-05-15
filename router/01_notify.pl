@@ -55,6 +55,6 @@ test 'router/01_notify', sub {
 
 sub parse_session {
     my $x = shift;
-    assert $x =~ /^201 (\d+) /;
+    assert $x =~ /^201 (\S+) /;
     $1;
 }

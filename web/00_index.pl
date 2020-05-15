@@ -103,3 +103,40 @@ test 'web/00_index/post', sub {
 
     cgi_verify_result($cgi, $result);
 };
+
+# Test system message
+test 'web/00_index/message', sub {
+    # Start setup with message configured
+    my $setup = shift;
+    my $message = 'This parrot is <b>not</b> dead!';
+    setup_add_service_config($setup, 'www.messagehtml', $message);
+    setup_start($setup);
+
+    # Just run the CGI with no parameters
+    my $cgi = cgi_new($setup, 'index.cgi');
+    my $result = cgi_run($cgi);
+
+    # Check
+    assert_equals $result->{headers}{'status'}, '200';
+    assert_contains $result->{text}, $message;
+
+    cgi_verify_result($cgi, $result);
+};
+
+# Test unavailability of user server
+test 'web/00_index/no_user', sub {
+    # Start setup with message configured
+    my $setup = shift;
+    setup_start($setup);
+
+    # Run the CGI with a cookie
+    my $cgi = cgi_new($setup, 'index.cgi');
+    cgi_add_cookie($cgi, 'session=3:xxxxxxxxxxxxxxxxxxxx:foo');
+    my $result = cgi_run($cgi);
+
+    # Check
+    assert_equals $result->{headers}{'status'}, '200';
+    assert_contains $result->{text}, 'User manager is down.';
+
+    cgi_verify_result($cgi, $result);
+};

@@ -19,7 +19,7 @@ test 'host/17_router', sub {
 
     # Start a session
     my $response = service_call_raw($rs, "NEW -WDIR=u/a/gamedir -WDIRPL=u/a/gamedir/3 $ufroot/u/a/gamedir 3\n");
-    assert $response =~ /^201\s*(\d+)/;
+    assert $response =~ /^201\s*(\S+)/;
     my $session_id = $1;
 
     # Make sure we can talk to this session

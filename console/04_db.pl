@@ -22,7 +22,9 @@ test 'console/04_db', sub {
     assert_equals conn_call($dbc, 'get', 'kk'), 'vv';
 
     # Verify that we can do things the shell sees
-    conn_call($dbc, 'sadd', 'someset', 'u', 'v', 'w');
+    conn_call($dbc, 'sadd', 'someset', 'u');
+    conn_call($dbc, 'sadd', 'someset', 'v');
+    conn_call($dbc, 'sadd', 'someset', 'w');
     assert shell_call($shell, "redis scard someset\n") =~ /result="?3"?/;  # respserver returns '"3"', redis-server returns '3'
 
     # Composability

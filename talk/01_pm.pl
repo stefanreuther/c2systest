@@ -17,10 +17,12 @@ test 'talk/01_pm', sub {
     my $dbc = service_connect_wait($db);
     conn_call($dbc, qw(set uid:a 1001));
     conn_call($dbc, qw(set uid:b 1002));
-    conn_call($dbc, qw(sadd user:all 1001 1002));
+    conn_call($dbc, qw(sadd user:all 1001));
+    conn_call($dbc, qw(sadd user:all 1002));
     conn_call($dbc, qw(hset user:1001:profile email a@invalid));
     conn_call($dbc, qw(hset user:1002:profile email b@invalid));
-    conn_call($dbc, qw(sadd default:folder:all 1 2));
+    conn_call($dbc, qw(sadd default:folder:all 1));
+    conn_call($dbc, qw(sadd default:folder:all 2));
 
     # Send PMs
     my $talkc = service_connect_wait($talk);

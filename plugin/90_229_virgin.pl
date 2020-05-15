@@ -10,9 +10,7 @@ test 'plugin/90_229_virgin', sub {
     my $setup = shift;
 
     # Make a temporary directory to use as $HOME
-    my $home = setup_get_tmpfile_name($setup, 'home');
-    mkdir $home, 0777 or die;
-    $ENV{HOME} = $home;
+    my $home = setup_add_home($setup);
 
     # Create a temporary plugin
     my $plugin = setup_get_tmpfile_name($setup, 'file.c2p');

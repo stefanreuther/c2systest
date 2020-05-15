@@ -103,6 +103,7 @@ sub prepare {
     setup_add_service_config($setup, 'talk.msgid', '@fqdn');
     setup_add_service_config($setup, 'talk.path', 'pathhost');
     setup_add_db($setup);
+    setup_add_usermgr($setup);
     setup_add_mailout($setup);
     setup_add_talk($setup);
     setup_add_nntp($setup);

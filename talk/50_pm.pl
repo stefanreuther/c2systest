@@ -27,7 +27,8 @@ test 'talk/50_pm', sub {
     conn_call($db, 'hset', 'default:folder:1:header', 'description', 'Incoming messages');
     conn_call($db, 'hset', 'default:folder:2:header', 'name',        'Outbox');
     conn_call($db, 'hset', 'default:folder:2:header', 'description', 'Sent messages');
-    conn_call($db, 'sadd', 'default:folder:all', 1, 2);
+    conn_call($db, 'sadd', 'default:folder:all', 1);
+    conn_call($db, 'sadd', 'default:folder:all', 2);
 
     # Send a message from A to B
     assert_equals conn_call($a, 'pmnew', 'u:b', 'subj', 'text:text'), 1;

@@ -144,9 +144,15 @@ test 'self/02_db/list', sub {
     my $db = prepare(@_);
 
     # Build list
-    conn_call($db, qw(rpush list d e f));
-    conn_call($db, qw(lpush list c b a));
-    conn_call($db, qw(rpush list g h i));
+    foreach (qw(d e f)) {
+        conn_call($db, qw(rpush list), $_);
+    }
+    foreach (qw(c b a)) {
+        conn_call($db, qw(lpush list), $_);
+    }
+    foreach (qw(g h i)) {
+        conn_call($db, qw(rpush list), $_);
+    }
 
     # Check content
     assert_equals conn_call($db, qw(llen list)), 9;
@@ -185,8 +191,12 @@ test 'self/02_db/set', sub {
     my $db = prepare(@_);
 
     # Create
-    conn_call($db, qw(sadd a 1 3 5 7 9));
-    conn_call($db, qw(sadd b 5 10 15 20));
+    foreach (qw(1 3 5 7 9)) {
+        conn_call($db, qw(sadd a), $_);
+    }
+    foreach (qw(5 10 15 20)) {
+        conn_call($db, qw(sadd b), $_);
+    }
 
     # Query
     assert_equals conn_call($db, qw(scard a)), 5;
@@ -210,7 +220,11 @@ test 'self/02_db/set', sub {
     }
 
     # Remove
-    assert_equals conn_call($db, qw(srem a 7 9 11 13)), 2;
+    my $sum = 0;
+    foreach (qw(7 9 11 13)) {
+        $sum += conn_call($db, qw(srem a), $_);
+    }
+    assert_equals $sum, 2;
 
     # Pop - only one element remaining
     assert_equals conn_call($db, qw(spop a)), 3;
@@ -222,8 +236,12 @@ test 'self/02_db/setop', sub {
     my $db = prepare(@_);
 
     # Setup
-    conn_call($db, qw(sadd a 1 3 5 7 9));
-    conn_call($db, qw(sadd b 1 2 3 4 5));
+    foreach (qw(1 3 5 7 9)) {
+        conn_call($db, qw(sadd a), $_);
+    }
+    foreach (qw(1 2 3 4 5)) {
+        conn_call($db, qw(sadd b), $_);
+    }
 
     # Verify single
     assert_set_equals conn_call($db, qw(sdiff a b)), [7,9];
@@ -247,7 +265,9 @@ test 'self/02_db/sort', sub {
     my $db = prepare(@_);
 
     # Setup
-    conn_call($db, qw(sadd a 1 3 5 7 9 11));
+    foreach (qw(1 3 5 7 9 11)) {
+        conn_call($db, qw(sadd a), $_);
+    }
 
     # Simple test
     assert_list_equals conn_call($db, qw(sort a)), [1,3,5,7,9,11];
@@ -261,6 +281,42 @@ test 'self/02_db/sort', sub {
 
     assert_set_equals conn_call($db, qw(sort a get k*)), [qw(one three five seven nine eleven)];
     assert_set_equals conn_call($db, qw(sort a get k* desc)), [qw(eleven nine seven five three one)];
+};
+
+# Implicit deletion
+test 'self/02_db/delete', sub {
+    my $db = prepare(@_);
+
+    # String does NOT disappear
+    conn_call($db, qw(set k v));
+    assert_equals conn_call($db, qw(type k)), 'string';
+    assert_equals conn_call($db, qw(exists k)), 1;
+    conn_call($db, qw(set k), '');
+    assert_equals conn_call($db, qw(exists k)), 1;      # remains!
+
+    # List does disappear
+    conn_call($db, qw(rpush l v));
+    assert_equals conn_call($db, qw(type l)), 'list';
+    assert_equals conn_call($db, qw(exists l)), 1;
+    assert_equals conn_call($db, qw(rpop l)), 'v';
+    assert_equals conn_call($db, qw(exists l)), 0;
+
+    # Set does disappear
+    conn_call($db, qw(sadd s v));
+    assert_equals conn_call($db, qw(type s)), 'set';
+    assert_equals conn_call($db, qw(exists s)), 1;
+    assert_equals conn_call($db, qw(srem s v)), 1;
+    assert_equals conn_call($db, qw(exists s)), 0;
+
+    # Hash does disappear
+    conn_call($db, qw(hset h k v));
+    assert_equals conn_call($db, qw(type h)), 'hash';
+    assert_equals conn_call($db, qw(exists h)), 1;
+    assert_equals conn_call($db, qw(hdel h k)), 1;
+    assert_equals conn_call($db, qw(exists h)), 0;
+
+    # Final check
+    assert_set_equals conn_call($db, qw(keys *)), ['k'];
 };
 
 sub prepare {

@@ -16,6 +16,7 @@
 #
 use strict;
 use c2systest;
+use IO::Socket::INET;
 
 # Magic to just export everything
 # (https://stackoverflow.com/questions/732133/how-can-i-export-all-subs-in-a-perl-package)
@@ -41,6 +42,7 @@ sub import {
 sub cgi_new {
     my $setup = shift;
     my $script = shift;
+    test_failure('Missing $script') if !defined($script) || $script eq '';
 
     my $path = setup_get_required_system_config($setup, 'c2web');
 
@@ -73,15 +75,45 @@ sub cgi_new {
             SCRIPT_FILENAME => "$path/$script",
             SCRIPT_NAME => "/$origScript",
             SERVER_NAME => 'pcc.com',
-            SERVER_PORT => '80'
+            SERVER_PORT => '80',
+            C2SYSTEST => 1
         }
     };
+}
+
+# cgi_new_form($setup, $form): Create CGI from form data.
+# Form data contains keys action (=script), method (=get/post), values; as parsed from html_verify().
+# Returns: test handle (like cgi_new).
+sub cgi_new_form {
+    my $setup = shift;
+    my $form = shift;
+    test_failure('Missing/invalid $form') if !$form || !ref($form) || !defined $form->{action} || !defined $form->{method} || !defined $form->{values};
+
+    # The form might request being posted to things like foo.cgi/blah
+    my $path = setup_get_required_system_config($setup, 'c2web');
+    my $script = $form->{action};
+    my $path_arg = '';
+    while (! -f "$path/$script" && $script =~ s|(/[^/]*)$||) {
+        $path_arg = $1.$path_arg;
+    }
+
+    my $cgi = cgi_new($setup, $script);
+    if ($path_arg ne '') {
+        cgi_set_path($cgi, $path_arg);
+    }
+    if (lc($form->{method}) eq 'post') {
+        cgi_set_post_params($cgi, %{$form->{values}});
+    } else {
+        cgi_set_get_params($cgi, %{$form->{values}});
+    }
+    $cgi;
 }
 
 # cgi_run($cgi): Run the test
 # Returns: result
 #    result->{headers} = {a=>, b=>}       Headers
 #    result->{cookies} = [a,b,c]          Cookies
+#    result->{cookies_by_name} = {a=>,b=>} Cookies
 #    result->{text}    = 'xxx'            Response body
 sub cgi_run {
     # Entry
@@ -103,6 +135,7 @@ sub cgi_run {
             } else {
                 $ENV{$_} = $cgi->{env}{$_};
             }
+            trace_detail("Environment: $_=$cgi->{env}{$_}");
         }
 
         # File handles
@@ -137,6 +170,7 @@ sub cgi_run {
     # Parse result
     my $result = {
         cookies => [],
+        cookies_by_name => { },
         headers => { }
     };
     while (1) {
@@ -159,12 +193,18 @@ sub cgi_run {
             if ($hdr eq 'set-cookie') {
                 push @{$result->{cookies}}, $val;
                 trace_detail("Received cookie: $val");
+                if ($val =~ /^(.*?)=([^;]*)/) {
+                    if (exists($result->{cookies_by_name}{$1})) {
+                        assert_failure("Duplicate cookie: '$1'");
+                    }
+                    $result->{cookies_by_name}{$1} = $2;
+                }
             } else {
+                trace_detail("Received header: $hdr: $val");
                 if (exists($result->{headers}{$hdr})) {
                     assert_failure("Duplicate header: '$hdr'");
                 }
                 $result->{headers}{$hdr} = $val;
-                trace_detail("Received header: $hdr: $val");
             }
         } else {
             # Irregular line (could be attempted continuation)
@@ -176,7 +216,11 @@ sub cgi_run {
         $result->{headers}{status} = 200;
         trace_detail("Setting status to 200");
     }
-    trace(5, "Received content: <<$text>>");
+    if ($text =~ /[\0-\11\13\14\16-\37]/) {
+        trace(5, "Received binary content");
+    } else {
+        trace(5, "Received content: <<$text>>");
+    }
     trace(2, sprintf("CGI produced %d bytes of content", length($text)));
     $result;
 }
@@ -194,6 +238,26 @@ sub cgi_set_path {
     $cgi->{env}{PATH_INFO} = $path;
 }
 
+# cgi_set_ua($cgi, $ua): set user-agent.
+sub cgi_set_ua {
+    my $cgi = shift;
+    my $ua = shift;
+    _cgi_verify($cgi);
+    if (!defined($ua)) { test_failure('Bad or missing $ua') }
+
+    $cgi->{env}{HTTP_USER_AGENT} = $ua;
+}
+
+# cgi_set_language($cgi, $lang): set Accept-Language.
+sub cgi_set_language {
+    my $cgi = shift;
+    my $lang = shift;
+    _cgi_verify($cgi);
+    if (!defined($lang)) { test_failure('Bad or missing $lang') }
+
+    $cgi->{env}{HTTP_ACCEPT_LANGUAGE} = $lang;
+}
+
 # cgi_set_post($cgi, $content, $contentType): make this a POST request (default is GET).
 # $content and $contentType specify the posted entity.
 sub cgi_set_post {
@@ -202,7 +266,13 @@ sub cgi_set_post {
     my $content = shift;
     my $ctype = shift;
     _cgi_verify($cgi);
-    if (!defined($content))                 { test_failure('Missing content') }
+    if (!defined($content)) { test_failure('Missing content') }
+    if ($content eq '' && !defined($ctype)) {
+        # This happens if someone does xhr.open('POST') without configuring data/content-type.
+        # PCC2 Web legacy does this. Fix it here instead of fixing legacy to avoid the test to proceed.
+        trace_test("$cgi->{script}: warning: no content-type provided for empty POST; fixing");
+        $ctype = 'application/octet-stream'
+    }
     if (!defined($ctype) || $ctype !~ m|/|) { test_failure('Bad content type') }
 
     # Stash away data
@@ -217,6 +287,33 @@ sub cgi_set_post {
     $cgi->{env}{CONTENT_TYPE} = $ctype;
     $cgi->{env}{CONTENT_LENGTH} = length($content);
     $cgi->{env}{REQUEST_METHOD} = 'POST';
+}
+
+# cgi_set_upload_params($cgi, {...}, {...}): make this a POST request using upload
+# Each {...} has keys 'name' and 'value', additional parameters can be given (i.e. 'filename').
+sub cgi_set_upload_params {
+    my $cgi = shift;
+    _cgi_verify($cgi);
+
+    my $result = "";
+    my $boundary = "alksjdasoidaui";
+    foreach my $e (@_) {
+        if (!exists $e->{name}) { test_failure('Missing {name}') }
+        if (!exists $e->{value}) { test_failure('Missing {value}') }
+
+        $result .= "--$boundary\n";
+        $result .= "Content-Disposition: form-data";
+        foreach my $k (sort keys %$e) {
+            $result .= "; $k=\"$e->{$k}\""
+                unless $k eq 'value';
+        }
+        $result .= "\n\n";
+        $result .= $e->{value};
+        $result .= "\n";
+    }
+    $result .= "--$boundary--\n";
+
+    cgi_set_post($cgi, $result, 'multipart/form-data; boundary="'.$boundary.'"');
 }
 
 # cgi_set_post_params($cgi, k, v, k, v, ...): make this a POST request using key/value pairs.
@@ -252,7 +349,8 @@ sub cgi_set_raw_query_string {
 sub cgi_add_cookie {
     my $cgi = shift;
     _cgi_verify($cgi);
-    foreach (@_) {
+    my @x = @_;
+    foreach (@x) {
         s/;.*//;
         $cgi->{env}{HTTP_COOKIE} .= '; ' if $cgi->{env}{HTTP_COOKIE} ne '';
         $cgi->{env}{HTTP_COOKIE} .= $_;
@@ -293,10 +391,10 @@ sub cgi_verify_result {
         $html = html_verify($cgi->{script}, $result->{text});
         my %modules;
         foreach (keys %{$html->{scripts}}) {
-            if (m|/([^/+])$|) { $modules{$1} |= 1 }
+            if (m|/([^/]+)\.js$|) { $modules{$1} |= 1 }
         }
         foreach (keys %{$html->{styles}}) {
-            if (m|/([^/+])$|) { $modules{$1} |= 2 }
+            if (m|/([^/]+)\.css$|) { $modules{$1} |= 2 }
         }
         foreach (sort keys %modules) {
             if ($modules{$_} == 1) { assert_failure("Script '$_' used but no accompanying style"); }
@@ -316,6 +414,64 @@ sub cgi_verify_result {
         }
     }
     $html;
+}
+
+# setup_post_api($setup, $endpoint, $cookie, @args...): post something into an API endpoint.
+# Call $endpoint (e.g. api/user.cgi) using the given @args (key/value pairs).
+# Passes a cookie if defined.
+# Returns the resulting parsed JSON object.
+sub setup_post_api {
+    my $setup = shift;
+    my $endpoint = shift;
+    my $cookie = shift;
+
+    # Prepare
+    my $cgi = cgi_new($setup, $endpoint);
+    cgi_set_post_params($cgi, @_);
+    cgi_add_cookie($cgi, $cookie) if defined($cookie) && $cookie ne '';
+
+    # Call. Must answer JSON.
+    my $result = cgi_run($cgi);
+    assert_starts_with $result->{headers}{"content-type"}, "text/json";
+
+    # Process result
+    my $parsed = json_parse($result->{text});
+    if (!$parsed->{result}) {
+        my $ec = $parsed->{errorCode} || 777;
+        my $er = $parsed->{error} || 'No error message given';
+        die "$ec $er";
+    }
+    $parsed;
+}
+
+# setup_make_cookie($setup, $uid, [$type]): make a login cookie
+# The result can be passed to cgi_add_cookie().
+# $type is 'session' (default) or 'autologin'.
+# This is a short-cut method to avoid having to script a login each time.
+sub setup_make_cookie {
+    my $setup = shift;
+    my $uid = shift;
+    my $type = shift;
+
+    my $uc = setup_connect_app($setup, 'user');
+    my $name = conn_call($uc, 'NAME', $uid);
+    my $token = conn_call($uc, 'MAKETOKEN', $uid, 'login');
+
+    $type ||= 'session';
+    "$type=3:$token:$name";
+}
+
+# setup_make_api_token($setup, $uid): make an API token,
+# This is a short-cut method to avoid having to script a login each time.
+sub setup_make_api_token {
+    my $setup = shift;
+    my $uid = shift;
+
+    my $uc = setup_connect_app($setup, 'user');
+    my $name = conn_call($uc, 'NAME', $uid);
+    my $token = conn_call($uc, 'MAKETOKEN', $uid, 'api');
+
+    "3:$token:$name";
 }
 
 sub _cgi_verify {
@@ -374,6 +530,8 @@ my %_html_entity_map =
 #  - images: images ("<img src>") as a hash (key=URL)
 #  - scripts: referenced scripts ("<script href>") as a hash (key=URL)
 #  - styles: referenced styles ("<link rel="stylesheet" href>") as a hash (key=URL)
+#  - forms: list of forms
+#  - forms_by_name: forms by name. Each form has {name=>, action=>, method=>, values=>{k...}}
 sub html_verify {
     my $id = shift;
     my $text = shift;
@@ -384,11 +542,14 @@ sub html_verify {
         num_warnings => 0,
         num_errors => 0,
         stack => [],
-        links => { },
-        images => { },
-        scripts => { },
-        styles => { },
-        ids => { }
+        form_stack => [],
+        links => {},
+        images => {},
+        scripts => {},
+        styles => {},
+        ids => {},
+        forms => [],
+        forms_by_name => {}
     };
 
     # Parser loop
@@ -410,7 +571,7 @@ sub html_verify {
         } elsif ($text =~ /\G<!--(.*?)-->/sgc) {
             # comment
             my $c = $1;
-            if ($c !~ /user [\d.]+ ms/) {
+            if ($c !~ /user [\d.]+ ms/ && $c !~ /^\[if IE/) {
                 _html_warn($state, "unexpected comment '$c'");
             }
         } elsif ($text =~ /\G([^<]+)/sgc) {
@@ -439,8 +600,9 @@ sub html_verify {
                     $close = 1;
                     last;
                 } elsif ($text =~ /\G([\w-]+)\s*=\s*"(.*?)"\s*/sgc
-                    || $text =~ /\G([\w-]+)\s*=\s*'(.*?)'\s*/sgc
-                    || $text =~ /\G([\w-]+)\s*=\s*([\w-]+)\s*/sgc)
+                         || $text =~ /\G([\w-]+)\s*=\s*'(.*?)'\s*/sgc
+                         || $text =~ /\G([\w-]+)\s*=\s*([\w-]+)\s*/sgc
+                         || $text =~ /\G((checked|selected))\b\s*/sgc)
                 {
                     my $att = $1;
                     my $val = $2;
@@ -478,6 +640,9 @@ sub html_verify {
                     _html_err($state, "mismatched tag: got '</$tag>', expected '</$state->{stack}[-1]>'");
                 } else {
                     pop @{$state->{stack}};
+                }
+                if (lc($tag) eq 'form') {
+                    pop @{$state->{form_stack}};
                 }
             }
         } else {
@@ -540,6 +705,54 @@ sub _html_verify_tag {
     } elsif ($tag eq 'a' && exists $atts->{href}) {
         # a: may have href attribute; count that
         $state->{links}{$atts->{href}}++;
+    } elsif ($tag eq 'form') {
+        # form: must have name, action; remember it on form stack
+        my $name = exists $atts->{name} ? $atts->{name} :
+            exists $atts->{id} ? $atts->{id} : '';
+        if ($name eq '') {
+            # Anonymous forms are actually allowed and used, so this is not an error.
+            # _html_err($state, "missing '<form id=XX>'");
+        }
+        if (!exists $atts->{action}) {
+            _html_err($state, "missing '<form action=XX>'");
+        }
+        if (!exists $atts->{method}) {
+            _html_warn($state, "missing '<$tag method=XX>'");
+        }
+
+        if (exists $state->{forms_by_name}{$name} && $name ne '') {
+            _html_warn($state, "duplicate form '$name'");
+        }
+
+        my $form = {
+            name => $name,
+            action => $atts->{action},
+            method => exists $atts->{method} ? lc($atts->{method}) : 'get',
+            values => { }
+        };
+        push @{$state->{form_stack}}, $form;
+        push @{$state->{forms}}, $form;
+        $state->{forms_by_name}{$name} = $form;
+    } elsif ($tag eq 'input') {
+        # input
+        if (@{$state->{form_stack}} && exists $atts->{name}) {
+            my $name = $atts->{name};
+            my $form_values = $state->{form_stack}[-1]{values};
+            my $type = exists $atts->{type} ? lc($atts->{type}) : 'input';
+            my $value = exists $atts->{value} ? $atts->{value} : '';
+            if ($type eq 'checkbox' || $type eq 'radio') {
+                # Clicky thing: take value only if checked, default to blank
+                if ((exists $atts->{checked} && $atts->{checked} eq 'checked')) {
+                    $form_values->{$name} = $value;
+                }
+                if (!exists $form_values->{$name}) {
+                    $form_values->{$name} = '';
+                }
+            } else {
+                # Normal input: just set value
+                $form_values->{$name} = $value;
+            }
+        }
     } else {
         # anything else
     }
@@ -600,6 +813,235 @@ sub _html_err {
     my ($state, $msg) = @_;
     trace_test("$state->{id}: error: $msg");
     ++$state->{num_errors};
+}
+
+##
+##  Serving
+##
+
+sub trace_in {
+    # trace(2, "  \033[32m< ", @_, "\033[0m");
+}
+
+sub trace_out {
+    # trace(2, "  \033[33;1m> ", @_, "\033[0m");
+}
+
+# setup_serve($setup): Serve the current setup.
+# Provides a really simple web server and serves CGIs and static files with the current setup.
+sub setup_serve {
+    my $setup = shift;
+    my $listener = IO::Socket::INET->new(Listen => 10, LocalHost => '127.0.0.1', Proto => 'tcp')
+        or die "new socket: $!";
+    my $host = $listener->sockhost();
+    my $port = $listener->sockport();
+    my $pid = fork();
+    if (!defined($pid)) {
+        die "fork: $!";
+    }
+    if ($pid == 0) {
+        # I am the child
+        $listener->listen() or die "listen: $!";
+        while (my $client = $listener->accept()) {
+            # Read line
+            $client->autoflush(1);
+            my $line = <$client>;
+            next if !defined($line);
+            $line =~ s/[\r\n]+//g;
+            print "< $line\n";
+
+            # Parse line
+            my ($method, $path, $version) = split /\s+/, $line;
+            last if $method eq 'QUIT';
+
+            # Parse headers
+            my %headers;
+            while (defined($line = <$client>)) {
+                $line =~ s/[\r\n]+//g;
+                trace_in($line)
+                    unless $line eq '';
+                my ($key, $value) = ($line =~ /^(\S+):\s*(.*)/) or last;
+                $headers{lc($key)} = $value;
+            }
+
+            # POST body
+            my $post_body;
+            my $post_length = $headers{'content-length'};
+            if (uc($method) eq 'POST' && defined($post_length)) {
+                read $client, $post_body, $post_length;
+            }
+
+            # Handle request
+            my $result = _setup_handle_request($setup, $method, $path, \%headers, $post_body);
+
+            # Produce result
+            my $status = (defined $result->{headers}{status} && $result->{headers}{status} =~ /^(\d+)/ ? $1 : '500');
+            my $resp = "HTTP/1.0 $status Whatever";
+            print $client "$resp\r\n";
+            trace_out($resp);
+            foreach (sort keys %{$result->{headers}}) {
+                if ($_ ne 'status') {
+                    my $line = "$_: $result->{headers}{$_}";
+                    print $client "$line\r\n";
+                    trace_out($line);
+                }
+            }
+            foreach(@{$result->{cookies}}) {
+                my $line = "set-cookie: $_";
+
+                # Our subject code generates "domain=127.0.0.1:<port>", which is not allowed
+                # and not accepted by browsers. Remove the port numbers.
+                $line =~ s/(;domain=[^:;]*):\d+/$1/;
+
+                print $client "$line\r\n";
+                trace_out($line);
+            }            
+            print $client "\r\n";
+            print $client $result->{text};
+            close $client;
+        }
+        exit(0);
+    } else {
+        # I am the parent
+        print "Listening on\n";
+        print "   http://$host:$port/\n";
+        print "Press ENTER to stop.\n";
+        readline(STDIN);
+
+        my $conn = IO::Socket::INET->new(PeerAddr => $host, PeerPort => $port, Proto => 'tcp')
+            or die "connect: $!";
+        $conn->autoflush(1);
+        print $conn "QUIT\n";
+        close $conn;
+        waitpid($pid, 0);
+    }
+}
+
+sub _setup_handle_request {
+    my ($setup, $method, $path, $headers, $post_body) = @_;
+
+    # Chomp off query string
+    my $query = ($path =~ s/\?(.*)// ? $1 : '');
+
+    # Locate item to access
+    my $base_path = setup_get_required_system_config($setup, 'c2web');
+    my $script_path = "";
+    while ($path =~ m|^(/[^/.][^/]*)(.*)| && -e "$base_path$1") {
+        # Regexp matches any path component not starting with a dot, to defeat ".." attacks
+        $base_path .= $1;
+        $script_path .= $1;
+        $path = $2;
+    }
+    if (-d $base_path) {
+        # The remaining path needs to be '/'. If it's not, we had a URL of the form "http://xxx/foo".
+        # Do NOT redirect. We don't want any implicit redirects happen in our production environment either.
+        if ($path ne '/') {
+            return { header => { status => 404 }, text => "Not Found (base='$base_path', query='$query')" };
+        }
+
+        # Turn "foo/" into "foo/index.cgi"
+        foreach (qw(/index.html /index.cgi)) {
+            if (-e "$base_path$_") {
+                $base_path .= $_;
+                $script_path .= $_;
+                $path = '';
+                last;
+            }
+        }
+    }
+    if (! -e $base_path) {
+        return { header => { status => 404 }, text => "Not Found (base='$base_path', query='$query')" };
+    }
+
+    # OK, we can handle this
+    if ($base_path =~ /\.cgi$/) {
+        # CGI
+        # script_path starts with "/", but cgi_new expects path without "/".
+        # If we do not strip it, the script will see wrong parameters and generate wrong links.
+        $script_path =~ s|^/||;
+        my $cgi = cgi_new($setup, $script_path);
+
+        # Serve headers, e.g. "Accept-Language" becomes "HTTP_ACCEPT_LANGUAGE".
+        foreach (sort keys %$headers) {
+            my $key = uc($_);
+            $key =~ s/-/_/g;
+            $cgi->{env}{"HTTP_$key"} = $headers->{$_};
+        }
+
+        # Set other parameters (possibly overwriting headers)
+        if ($path ne '') { cgi_set_path($cgi, $path); }
+        if ($query ne '') { cgi_set_raw_query_string($cgi, $query); }
+        if (defined $post_body) { cgi_set_post($cgi, $post_body, $headers->{'content-type'}); }
+
+        return cgi_run($cgi);
+    } else {
+        # Static file
+        # Serve with max-age, to reduce the number of requests made by the browser.
+        open FILE, '<', $base_path or die "$base_path: $!";
+        my $content = join("", <FILE>);
+        close FILE;
+        return { headers => { status => 200,
+                              'content-type' => _get_type_from_name($base_path),
+                              'cache-control' => 'max-age=1000' },
+                 text => $content };
+    }
+}
+
+sub _get_type_from_name {
+    foreach (@_) {
+        /\.html?$/ and return 'text/html';
+        /\.gif$/ and return 'image/gif';
+        /\.png$/ and return 'image/png';
+        /\.jpe?g$/ and return 'image/jpeg';
+        /\.css$/ and return 'text/css';
+        /\.js$/ and return 'text/javascript';
+        return 'application/octet-stream';
+    }
+}
+
+
+##
+##  Links
+##
+
+# normalize_link($orig, $link): resolve the given link starting from path $orig.
+# The result will either be an absolute link with schema (if the $link was one),
+# or a path starting from the root of the server with no leading slash.
+# Example: normalize_link("a/b/c", "../d") will be "a/d".
+sub normalize_link {
+    my ($path, $link) = @_;
+    $path =~ s|[^/]+$||;
+    if ($link =~ /^\w+:/) {
+        return $link;
+    } elsif ($link =~ m|^/(.*)|) {
+        return $1;
+    } else {
+        my @list;
+        foreach (split m|/|, $path.$link) {
+            if ($_ eq '..') {
+                if (!@list) {
+                    assert_failure "Link '$link' points outside web root (too many '..')";
+                }
+                pop @list;
+            } else {
+                push @list, $_;
+            }
+        }
+        return join('/', @list);
+    }
+}
+
+# normalize_links($orig, $link_hash): transform a link hash as produced by cgi_verify_result
+# into a new hash with normalized paths. Returns new link has reference.
+# Use as 'normalize_links("orig.cgi", $html->{links})'.
+sub normalize_links {
+    my $orig = shift;
+    my $p = shift;
+    my $result = {};
+    foreach my $k (keys %$p) {
+        $result->{normalize_link($orig, $k)} = $p->{$k};
+    }
+    $result;
 }
 
 1;

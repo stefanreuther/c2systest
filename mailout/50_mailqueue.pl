@@ -109,14 +109,20 @@ test 'mailout/50_mailqueue/confirm/success', sub {
     setup_add_service_config($setup, 'www.key', '');
     setup_start_wait($setup);
 
+    my $db = setup_connect_app($setup, 'db');
+    conn_call($db, qw(hset user:1002:profile email u@h));
+
     # Confirm
     my $mc = setup_connect_app($setup, 'mailout');
     conn_call($mc, qw(confirm u@h MTAwMiyOCD5qhk5r83gESdGzGW9K info));
 
     # Verify
-    my $db = setup_connect_app($setup, 'db');
     assert_equals conn_call($db, qw(hget email:u@h:status status/1002)), 'c';
     assert_equals conn_call($db, qw(hget email:u@h:status confirm/1002)), 'info';
+
+    my %info = conn_call_list($mc, qw(status 1002));
+    assert_equals $info{address}, 'u@h';
+    assert_equals $info{status}, 'c';
 };
 
 # TestServerMailoutMailQueue::testConfirmFailure: Test CONFIRM, failure case.

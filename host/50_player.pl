@@ -2,7 +2,7 @@
 #
 #  Host: HostPlayer
 #
-#  Synced with TestServerHostHostPlayer, 20170925
+#  Synced with TestServerHostHostPlayer, 20190413
 #
 use strict;
 use c2systest;
@@ -586,6 +586,93 @@ test 'host/50_player/state', sub {
     assert_throws sub{ conn_call($hc, qw(playerresign 1 1 u2)) }, 412;
 };
 
+# TestServerHostHostPlayer::testGetSet: test game settings
+test 'host/50_player/getset', sub {
+    my $setup = shift;
+    prepare($setup);
+    add_users($setup);
+
+    my $root_session = setup_connect_app($setup, 'host');
+    my $user_session = setup_connect_app($setup, 'host');
+    my $other_session = setup_connect_app($setup, 'host');
+    conn_call($user_session, 'user', 'u4');
+    conn_call($other_session, 'user', 'u9');
+
+    # Create two games and join a user
+    my $gid1 = add_game($setup, 'public', 'joining');
+    my $gid2 = add_game($setup, 'public', 'joining');
+    conn_call($root_session, 'playerjoin', $gid1, 3, 'u4');
+    conn_call($root_session, 'playerjoin', $gid2, 4, 'u4');
+
+    # Initial value: empty
+    # - success cases: root, player themselves
+    assert_equals conn_call($user_session, 'playerget', $gid1, 'u4', 'mailgametype'), '';
+    assert_equals conn_call($root_session, 'playerget', $gid1, 'u4', 'mailgametype'), '';
+    assert_equals conn_call($user_session, 'playerget', $gid2, 'u4', 'mailgametype'), '';
+    assert_equals conn_call($root_session, 'playerget', $gid2, 'u4', 'mailgametype'), '';
+    # - failure cases: different player, player not on game
+    assert_throws sub { conn_call($other_session, 'playerget', $gid2, 'u4', 'mailgametype') }, 403;
+    assert_throws sub { conn_call($root_session, 'playerget', $gid2, 'u77', 'mailgametype') }, 403;
+
+    # Change it
+    # - success cases: root, player themselves
+    conn_call($user_session, 'playerset', $gid1, 'u4', 'mailgametype', 'zip');
+    conn_call($root_session, 'playerset', $gid2, 'u4', 'mailgametype', 'rst');
+
+    # - failure cases: different player, player not on game
+    assert_throws sub { conn_call($other_session, 'playerset', $gid2, 'u4', 'mailgametype', 'info') }, 403;
+    assert_throws sub { conn_call($root_session, 'playerset', $gid2, 'u77', 'mailgametype', 'info') }, 403;
+
+    # Verify
+    assert_equals conn_call($user_session, 'playerget', $gid1, 'u4', 'mailgametype'), 'zip';
+    assert_equals conn_call($root_session, 'playerget', $gid1, 'u4', 'mailgametype'), 'zip';
+    assert_equals conn_call($user_session, 'playerget', $gid2, 'u4', 'mailgametype'), 'rst';
+    assert_equals conn_call($root_session, 'playerget', $gid2, 'u4', 'mailgametype'), 'rst';
+};
+
+# TestServerHostHostPlayer::testProfilePermission: Test joining with profile permissions
+test 'host/50_player/join/perms', sub {
+    my $setup = shift;
+    prepare($setup);
+    add_users($setup);
+
+    my $dbc = setup_connect_app($setup, 'db');
+    conn_call($dbc, qw(hset user:u1:profile allowjoin 1));
+    conn_call($dbc, qw(hset user:u2:profile allowjoin 0));
+
+    # u1 can join (allowed in profile)
+    {
+        my $gid = add_game($setup, 'public', 'joining');
+        my $hc = setup_connect_app($setup, 'host');
+        conn_call($hc, 'user', 'u1');
+        assert conn_call($hc, 'playerjoin', $gid, 1, 'u1');
+    }
+
+    # u2 can not join (forbidden in profile)
+    {
+        my $gid = add_game($setup, 'public', 'joining');
+        my $hc = setup_connect_app($setup, 'host');
+        conn_call($hc, 'user', 'u2');
+        assert_throws sub{ conn_call($hc, 'playerjoin', $gid, 1, 'u2') }, 403;
+    }
+
+    # u3 can join (default)
+    {
+        my $gid = add_game($setup, 'public', 'joining');
+        my $hc = setup_connect_app($setup, 'host');
+        conn_call($hc, 'user', 'u3');
+        assert conn_call($hc, 'playerjoin', $gid, 1, 'u3');
+    }
+
+    # root can join anyone
+    {
+        my $gid = add_game($setup, 'public', 'joining');
+        my $hc = setup_connect_app($setup, 'host');
+        assert conn_call($hc, 'playerjoin', $gid, 1, 'u1');
+        assert conn_call($hc, 'playerjoin', $gid, 2, 'u2');
+        assert conn_call($hc, 'playerjoin', $gid, 3, 'u3');
+    }
+};
 
 sub prepare {
     my $setup = shift;

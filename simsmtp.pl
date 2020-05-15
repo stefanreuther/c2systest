@@ -48,8 +48,9 @@ while (my $client = $listener->accept()) {
     # Open
     ++$counter;
     my $logfile_name = $config{'simsmtp.dir'}.'/smtp'.$counter;
+    my $new_name = "$logfile_name.new";
     print "smtpsim: new connection, writing to $logfile_name\n";
-    open LOG, ">", $logfile_name or die "$logfile_name: $!\n";
+    open LOG, ">", $new_name or die "$new_name: $!\n";
     LOG->autoflush(1);
 
     # Greeting
@@ -81,4 +82,7 @@ while (my $client = $listener->accept()) {
     # Finish
     close $client;
     close LOG;
+
+    rename $new_name, $logfile_name
+        or die "$new_name: $!";
 }

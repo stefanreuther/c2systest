@@ -19,7 +19,8 @@ test 'talk/50_folder', sub {
     my $dbc = setup_connect_app($setup, 'db');
     conn_call($dbc, 'hmset', 'default:folder:1:header', 'name', 'Inbox', 'description', 'Incoming messages');
     conn_call($dbc, 'hmset', 'default:folder:2:header', 'name', 'Outbox', 'description', 'Sent messages');
-    conn_call($dbc, 'sadd', 'default:folder:all', 1, 2);
+    conn_call($dbc, 'sadd', 'default:folder:all', 1);
+    conn_call($dbc, 'sadd', 'default:folder:all', 2);
 
     # Testee
     my $tc = setup_connect_app($setup, 'talk');

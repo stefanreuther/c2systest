@@ -74,13 +74,14 @@ my $_log_color = -t STDOUT;
 my $_debug = 0;
 my $_test_only = 0;
 my $_test_current = 0;
+my $_keep_temps = 0;
 
 # cmdl_parse(): Parse command line.
 sub cmdl_parse {
     if (!$_cmdl_args) {
         $_cmdl_args = {
             config => {},
-            config_file => 'system.conf',
+            config_file => [],
             path_prefix => ''
         };
         if ($0 =~ m|^(.*/)|) {
@@ -94,29 +95,37 @@ sub cmdl_parse {
   --config=file      Set system configuration file name
   --[no-]colors      Colored output
   -v / -q            Add/remove verbosity
-  --debug            Internal debug mode\n";
+  --debug            Internal debug mode
+  --only=N           Run only Nth test case
+  --keep-temps=N     Keep temporary directories\n";
                 exit 0;
             } elsif (/^-D(.*?)=(.*)/) {
                 $_cmdl_args->{config}{lc($1)} = $2;
             } elsif (/^--?config=(.*)/) {
-                $_cmdl_args->{config_file} = $1;
+                push @{$_cmdl_args->{config_file}}, $1;
             } elsif (/^--?color$/) {
                 $_log_color = 1;
             } elsif (/^--?no-?color$/) {
                 $_log_color = 0;
             } elsif (/^-(v+)$/) {
                 $_log_level += length($1);
+            } elsif (/^-v(\d+)$/) {
+                $_log_level += $1;
             } elsif (/^-(q+)$/) {
                 $_log_level -= length($1);
             } elsif (/^--?debug$/) {
                 $_debug = 1;
             } elsif (/^--?only=(\d+)$/) {
                 $_test_only = $1;
+            } elsif (/^--?keep-temps?$/) {
+                $_keep_temps = 1;
             } else {
                 die "$0: unknown command-line option '$_'\n";
             }
         }
     }
+    push @{$_cmdl_args->{config_file}}, 'system.conf'
+        if !@{$_cmdl_args->{config_file}};
     $_cmdl_args;
 }
 
@@ -216,6 +225,16 @@ sub setup_create {
     if (!defined $name) { $name = caller };
     trace_creation("Creating setup: $name");
 
+    # Pre-command hook
+    if (exists $config->{'initcommand'}) {
+        my $cmd = $config->{'initcommand'};
+        trace_process("Executing: $cmd");
+        my $result = system($cmd);
+        if ($result != 0) {
+            die "Command '$cmd' failed with exit code $result\n";
+        }
+    }
+
     # Default service configuration with keys we don't want at defaults
     my $service_config = {
         'user.key' => 'y',
@@ -261,8 +280,12 @@ sub setup_destroy {
     setup_stop($setup);
     my $tmpdir = $setup->{tmpdir};
     if (defined($tmpdir) && $tmpdir ne '' && $tmpdir ne '/') {
-        trace_creation("Removing directory: $tmpdir");
-        system "rm", "-rf", $tmpdir;
+        if ($_keep_temps) {
+            trace_test("Keeping directory: $tmpdir");
+        } else {
+            trace_creation("Removing directory: $tmpdir");
+            system "rm", "-rf", $tmpdir;
+        }
         $setup->{tmpdir} = undef;
     }
 }
@@ -449,6 +472,23 @@ sub setup_add_host {
     setup_add_app($setup, 'host', 'c2host', @_);
 }
 
+# setup_add_user($setup[, commandline]): add "user" service
+# Returns: service handle
+sub setup_add_usermgr {
+    my $setup = shift;
+    setup_add_app($setup, 'user', 'c2user', @_);
+}
+
+# setup_add_router($setup[, commandline]): add "router" service
+# You need to configure ROUTER.SERVER (and ROUTER.FILENOTIFY if you don't have a file server).
+# Returns: service handle
+sub setup_add_router {
+    my $setup = shift;
+    my $rs = setup_add_app($setup, 'router', 'c2router', @_);
+    service_set_pingable($rs, 0);
+    $rs;
+}
+
 # setup_add_userfile($setup, opt $basedir): add user filer ("file").
 # Pass 'auto' as basedir to create one automatically.
 # Pass undefined (leave out) basedir to run on internal storage if possible.
@@ -524,8 +564,8 @@ sub setup_add_apps {
     wantarray ? @result : $result[0];
 }
 
-# setup_connect_app($setup, $id): connect to an app by name
-sub setup_connect_app {
+# setup_get_service($setup, $id): get service by name
+sub setup_get_service {
     my $setup = shift;
     my $id = shift;
     _setup_verify($setup);
@@ -533,10 +573,25 @@ sub setup_connect_app {
 
     foreach (@{$setup->{services}}) {
         if (defined($_->{id}) && $id eq $_->{id}) {
-            return service_connect($_);
+            return $_;
         }
     }
     test_failure("Service '$id' not configured");
+}
+
+# setup_connect_app($setup, $id): connect to an app by name
+sub setup_connect_app {
+    service_connect(setup_get_service(@_));
+}
+
+# setup_add_home($setup): add a home directory
+sub setup_add_home {
+    my $setup = shift;
+    _setup_verify($setup);
+    my $home = setup_get_tmpfile_name($setup, 'home');
+    mkdir $home, 0777 or die;
+    $ENV{HOME} = $home;
+    $home;
 }
 
 # setup_start($setup): start the setup (=create files and start all services).
@@ -588,20 +643,22 @@ sub _setup_load_config {
     my $args = cmdl_parse();
 
     # Read config file
-    my $config_file = $args->{config_file};
-    open FILE, '<', $config_file or die "$config_file: $!\n";
-    trace_creation("Reading $config_file...");
-    while (<FILE>) {
-        s/^\s+//; s/\s+$//;
-        if (/^$/ || /^#/ || /^;/) {
-            # ok
-        } elsif (/^(\S+)\s*=\s*(.*)/) {
-            $result->{lc($1)} = $2;
-        } else {
-            die "$config_file:$.: syntax error\n";
+    foreach my $config_file (@{$args->{config_file}}) {
+        -f $config_file or die "$config_file: not a file\n";
+        open FILE, '<', $config_file or die "$config_file: $!\n";
+        trace_creation("Reading $config_file...");
+        while (<FILE>) {
+            s/^\s+//; s/\s+$//;
+            if (/^$/ || /^#/ || /^;/) {
+                # ok
+            } elsif (/^(\S+)\s*=\s*(.*)/) {
+                $result->{lc($1)} = $2;
+            } else {
+                die "$config_file:$.: syntax error\n";
+            }
         }
+        close FILE;
     }
-    close FILE;
 
     # Merge args
     foreach (keys %{$args->{config}}) {
@@ -788,7 +845,7 @@ sub service_call_raw {
 
     if (4 <= $_log_level) {
         # xref trace_detail
-        trace_detail("service_call_raw ", $service->{id}, ": ", _censor_raw($text), "\n");
+        trace_detail("service_call_raw ", $service->{id}, ": ", _censor_raw($text));
     }
 
     my $conn;
@@ -879,8 +936,17 @@ sub shell_call {
     $cmd .= " >$out_name";
     $cmd .= " 2>&1" if $opts{want_error};
 
-    # Evaluate result
+    # Execute
     my $exit_code = _execute($cmd);
+
+    # Read output
+    if (!-r $out_name) {
+        assert_failure("Command '$cmd' did not produce output file");
+    }
+    my $result = file_content($out_name);
+    trace(5, "Output: <<$result>>");
+
+    # Evaluate result
     if (!$opts{ignore_exit}) {
         my $expect_exit = $opts{expect_exit} || 0;
         if ($exit_code != $expect_exit) {
@@ -888,13 +954,6 @@ sub shell_call {
         }
     }
 
-    # Read input
-    if (!-r $out_name) {
-        assert_failure("Command '$cmd' did not produce output file");
-    }
-
-    my $result = file_content($out_name);
-    trace(5, "Output: <<$result>>");
     $result;
 };
 
@@ -1027,6 +1086,78 @@ sub _conn_resp_unpack {
 sub _conn_verify {
     my $conn = shift;
     test_failure('Missing $conn') if !$conn || !ref($conn) || !defined $conn->{fd};
+}
+
+##
+##  Utilities
+##
+
+sub json_parse {
+    my $str = shift;
+    pos($str) = 0;
+    _json_parse(\$str);
+}
+
+sub _json_parse {
+    my $p = shift;
+    $$p =~ m|\G\s*|sgc;
+    if ($$p =~ m#\G"(([^\\"]+|\\.)*)"#gc) {
+        # String: don't do anything fancy for now (charset translation, unicode escapes).
+        my $s = $1;
+        $s =~ s|\\(.)|_unquote($1)|eg;
+        $s;
+    } elsif ($$p =~ m|\G([-+]?\d+\.\d*)|gc) {
+        $1;
+    } elsif ($$p =~ m|\G([-+]?\.\d+)|gc) {
+        $1;
+    } elsif ($$p =~ m|\G([-+]?\d+)|gc) {
+        $1;
+    } elsif ($$p =~ m|\Gtrue\b|gc) {
+        1
+    } elsif ($$p =~ m|\Gfalse\b|gc) {
+        0
+    } elsif ($$p =~ m|\Gnull\b|gc) {
+        undef
+    } elsif ($$p =~ m|\G\{|gc) {
+        my $result = {};
+        while (1) {
+            $$p =~ m|\G\s*|sgc;
+            if ($$p =~ m|\G\}|gc) { last }
+            elsif ($$p =~ m|\G,|gc) { }
+            else {
+                my $key = _json_parse($p);
+                $$p =~ m|\G\s*|sgc;
+                if ($$p !~ m|\G:|gc) { assert_failure("JSON syntax error: expecting ':', got '" . substr($$p, pos($$p), 20) . "'"); }
+                my $val = _json_parse($p);
+                $result->{$key} = $val;
+            }
+        }
+        $result;
+    } elsif ($$p =~ m|\G\[|gc) {
+        my $result = [];
+        while (1) {
+            $$p =~ m|\G\s*|sgc;
+            if ($$p =~ m|\G\]|gc) { last }
+            elsif ($$p =~ m|\G,|gc) { }
+            else { push @$result, _json_parse($p) }
+        }
+        $result;
+    } else {
+        assert_failure("JSON syntax error: expecting element, got '" . substr($$p, pos($$p), 20) . "'.");
+    }
+}
+
+sub _unquote {
+    my $x = shift;
+    if ($x eq 'n') {
+        return "\n";
+    } elsif ($x eq 't') {
+        return "\t";
+    } elsif ($x eq 'r') {
+        return "\r";
+    } else {
+        return $x;
+    }
 }
 
 ##
@@ -1258,6 +1389,16 @@ sub assert_failure {
     }
 }
 
+my $_backtrace_context;
+
+sub set_context {
+    $_backtrace_context = shift;
+}
+
+sub clear_context {
+    undef $_backtrace_context;
+}
+
 sub _print_backtrace {
     my $msg = shift;
     my $kind = shift;
@@ -1267,9 +1408,11 @@ sub _print_backtrace {
     my $error = trace_color(31, "error:");
     my $did = 0;
     my $i = 1;
+    my $pos = "<unknown>";
     while (my ($pkg, $file, $line, $fn) = caller($i)) {
         if ($pkg ne 'c2systest' || $_debug) {
-            print STDERR "$file:$line: $error $text\n";
+            $pos = "$file:$line";
+            print STDERR "$pos: $error $text\n";
             $text = "  called from here";
             $did = 1;
         }
@@ -1277,7 +1420,11 @@ sub _print_backtrace {
     }
 
     if (!$did) {
-        print STDERR "<unknown>: $error $text\n";
+        print STDERR "$pos: $error $text\n";
+    }
+
+    if (defined $_backtrace_context) {
+        print STDERR "$pos: $error   with context $_backtrace_context\n";
     }
 }
 
@@ -1298,6 +1445,109 @@ sub _execute {
     waitpid $pid, 0;
     return $?;
 }
+
+##
+##  Summary
+##
+
+# summary_new(): create a summary. Use summary_add() to add to it, summary_print() to show it.
+sub summary_new {
+    return {
+        _is_summary => 1,
+        columns => [],
+        rows    => [],
+        name_to_col => {}
+    };
+}
+
+# summary_add($sum, $key, $value, ...): add line to summary.
+sub summary_add {
+    my $sum = shift;
+    _summary_verify($sum);
+
+    my $this_row = [];
+    while (@_) {
+        my $key = shift;
+        my $value = shift;
+        my $this_col = $sum->{name_to_col}{$key};
+        if (!defined $this_col) {
+            $this_col = scalar(@{$sum->{columns}});
+            push @{$sum->{columns}}, $key;
+            $sum->{name_to_col}{$key} = $this_col;
+        }
+        while (@$this_row < $this_col) {
+            push @$this_row, '';
+        }
+        $this_row->[$this_col] = $value;
+    }
+    push @{$sum->{rows}}, $this_row;
+}
+
+# summary_print($sum): print summary.
+# Each summary_add() produces one table line.
+# Keys are mapped to columns in the order they were seen.
+# An empty summary produces no output at all.
+sub summary_print {
+    my $sum = shift;
+    _summary_verify($sum);
+
+    # Determine lengths
+    my @lengths;
+    foreach my $row ($sum->{columns}, @{$sum->{rows}}) {
+        foreach my $i (0 .. $#$row) {
+            my $len = length($row->[$i]);
+            if (!defined $lengths[$i] || $lengths[$i] < $len) {
+                $lengths[$i] = $len;
+            }
+        }
+    }
+    return if !@lengths;
+
+    # Print headers
+    my $head = '';
+    my $div = '';
+    trace(0, '');
+    foreach my $i (0 .. $#lengths) {
+        my $e = $sum->{columns}[$i];
+        if (!defined($e)) { $e = '' }
+        while (length($e) < $lengths[$i]) {
+            $e .= ' ';
+            if (length($e) < $lengths[$i]) {
+                $e = ' '.$e;
+            }
+        }
+        $head .= '  ' if $i;
+        $head .= $e;
+        $div .= '  ' if $i;
+        $div .= '-' x length($e);
+    }
+    trace(0, $head);
+    trace(0, $div);
+
+    # Print content
+    foreach my $row (@{$sum->{rows}}) {
+        my $line = '';
+        foreach my $i (0 .. $#lengths) {
+            my $e = $row->[$i];
+            if (!defined($e)) { $e = '' }
+            $line .= '  ' if $i;
+            if ($e =~ /^[-+]*[\d.]+%?$/) {
+                $line .= sprintf("%$lengths[$i]s", $e);
+            } else {
+                $line .= sprintf("%-$lengths[$i]s", $e);
+            }
+        }
+        $line =~ s/\s+$//;
+        trace(0, $line);
+    }
+    trace(0, '');
+}
+
+sub _summary_verify {
+    my $sum = shift;
+    test_failure('Missing $sum') if !$sum || !ref($sum) || !$sum->{_is_summary};
+}
+
 
 ##
 ##  Utilities
@@ -1340,9 +1590,10 @@ sub file_wait {
 ##  Main test entry point
 ##
 
-# test 'name', sub {...}: execute a test case.
-sub test {
+# test_if 'name', sub {...}, sub {...}: execute a conditional test case.
+sub test_if {
     my $name = shift;
+    my $cond = shift;
     my $fn = shift;
 
     cmdl_parse();
@@ -1352,25 +1603,37 @@ sub test {
         1;
     } else {
         my $setup = setup_create($name);
-        my $saved_log_level = $_log_level;
+        if (!$cond->($setup)) {
+            trace_test(trace_color('30;1', "NOT-APPLICABLE"), " $name [#$_test_current]");
+        } else {
+            my $saved_log_level = $_log_level;
 
-        trace_test("Running $name [#$_test_current]...");
-        eval {
-            $fn->($setup);
-            $_log_level = $saved_log_level;
-            setup_destroy($setup);
-            if (grep {$_->{failed}} @{$setup->{services}}) {
-                die 'Failed services';
-            }
-            trace_test(trace_color(32, "SUCCESS"), " $name");
-            1;
-        } or do {
-            $_log_level = $saved_log_level;
-            setup_destroy($setup);
-            trace_test(trace_color(31, "FAILURE"), " $name");
-            die "$@";
+            trace_test("Running $name [#$_test_current]...");
+            eval {
+                $fn->($setup);
+                $_log_level = $saved_log_level;
+                setup_destroy($setup);
+                if (grep {$_->{failed}} @{$setup->{services}}) {
+                    die 'Failed services';
+                }
+                trace_test(trace_color(32, "SUCCESS"), " $name");
+                1;
+            } or do {
+                $_log_level = $saved_log_level;
+                setup_destroy($setup);
+                trace_test(trace_color(31, "FAILURE"), " $name");
+                die "$@";
+            };
         }
+        clear_context();
     }
+}
+
+# test 'name', sub {...}: execute a test case.
+sub test {
+    my $name = shift;
+    my $fn = shift;
+    test_if $name, sub { return 1 }, $fn;
 }
 
 # test_timing 'name', sub {...}: execute a timing/benchmark/performance test (time the runtime of the given sub).

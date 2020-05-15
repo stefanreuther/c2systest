@@ -7,7 +7,7 @@ use c2systest;
 
 test 'untrn/02_zap', sub {
     my $setup = shift;
-    my $prog = setup_get_required_system_config($setup, 'untrn.path');
+    my $prog = setup_get_required_system_config($setup, 'c2untrn.path');
     my $in   = cmdl_input_file('player7.trn');
     my $ref  = cmdl_input_file('empty.trn');
     my $out  = setup_get_tmpfile_name($setup, 'work.trn');

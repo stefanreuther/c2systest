@@ -50,6 +50,8 @@ test 'mailin/50_mailprocessor/turn', sub {
     assert_equals $list[0]{args}{trn_status}, 1;
     assert_equals $list[0]{args}{gameid}, 32;
     assert_equals $list[0]{args}{mail_subject}, 'test';
+    assert_equals $list[0]{args}{gamename}, 'MyGame';
+    assert_equals $list[0]{args}{gameturn}, 42;
 };
 
 
@@ -244,7 +246,8 @@ sub prepare_game {
     # Create game using regular mechanisms
     my $hc = setup_connect_app($setup, 'host');
     assert_equals conn_call($hc, 'newgame'), $gid;
-    conn_call($hc, 'gameset', $gid, masterHasRun => 1, timestamp => $timestamp);
+    conn_call($hc, 'gamesetname', $gid, 'MyGame');
+    conn_call($hc, 'gameset', $gid, masterHasRun => 1, timestamp => $timestamp, turn => 42);
     conn_call($hc, 'gamesettype', $gid, 'public');
     conn_call($hc, 'gamesetstate', $gid, 'running');
 

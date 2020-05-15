@@ -151,19 +151,28 @@ sub setup_hostfile_add_defaults {
     conn_call($hfc, qw(put defaults/xyplan.dat), _generate_map());
 }
 
-# setup_hostfile_add_default_scripts($setup): add default scripts. Requires c2server. Call after setup_hostfile_add_defaults.
-sub setup_hostfile_add_default_scripts {
+# setup_get_init_scripts($setup): get path to init scripts. Needs c2ng.
+sub setup_get_init_scripts {
     my $setup = shift;
-    my $hfc = setup_connect_app($setup, 'hostfile');
-    my $bindir = setup_get_required_system_config($setup, 'c2server').'/planetscentral/init';
+    # Assuming c2ng points at a completely-installed directory ('make install')
+    my $bindir = setup_get_required_system_config($setup, 'c2ng').'/../share/server/scripts/init';
     if (!-d $bindir) {
-        $bindir = setup_get_required_system_config($setup, 'c2ng').'/server/scripts/init/bin';
+        # Assuming c2ng points at a build directory that is child of a source directory ('make all resources')
+        $bindir = setup_get_required_system_config($setup, 'c2ng').'/../server/scripts/init';
     }
     if (!-d $bindir) {
         die "Unable to locate host scripts"
     }
+    $bindir;
+}
+
+# setup_hostfile_add_default_scripts($setup): add default scripts. Requires c2server. Call after setup_hostfile_add_defaults.
+sub setup_hostfile_add_default_scripts {
+    my $setup = shift;
+    my $hfc = setup_connect_app($setup, 'hostfile');
+    my $bindir = setup_get_init_scripts($setup); 
     foreach (qw(runhost.sh runmaster.sh checkturn.sh updateconfig.pl checkinstall.sh)) {
-        conn_call($hfc, 'put', 'bin/'.$_, file_content($bindir.'/'.$_));
+        conn_call($hfc, 'put', 'bin/'.$_, file_content($bindir.'/bin/'.$_));
     }
 }
 
@@ -190,7 +199,7 @@ sub setup_host_add_phost {
     conn_call($hfc, 'put', "$dstdir/pconfig.src", file_content("$srcdir/config/simple.src"));
 
     # Add to host
-    conn_call($hc, 'hostadd', $name, $dstdir, 'phost', 'host');
+    conn_call($hc, 'hostadd', $name, $dstdir, 'phost', 'phost');
     conn_call($hc, 'hostset', $name, 'description', "c2systest phost upload from $srcdir");
 }
 

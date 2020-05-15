@@ -205,6 +205,7 @@ test 'host/50_turn/submit/stalemail', sub {
 # TestServerHostHostTurn::testStatus: Test statuses.
 test 'host/50_turn/status', sub {
     my $setup = shift;
+    setup_add_service_config($setup, 'Host.UsersSeeTemporaryTurns', 'False');
     prepare($setup);
     my $gid = prepare_game($setup, $DEFAULT_TIMESTAMP);
 
@@ -268,6 +269,52 @@ test 'host/50_turn/status', sub {
 
     %i = conn_call_list($two, 'gamestat', $gid);
     assert_equals $i{turns}[$SLOT_NR-1], 1;           # does not see temporary flag nor yellow
+};
+
+# TestServerHostHostTurn::testStatusTempEnable: Test statuses.
+# Fails on -classic (not supported).
+test 'host/50_turn/status_temp', sub {
+    my $setup = shift;
+    setup_add_service_config($setup, 'Host.UsersSeeTemporaryTurns', 'True');
+    prepare($setup);
+    my $gid = prepare_game($setup, $DEFAULT_TIMESTAMP);
+
+    # Three different contexts
+    my $root = setup_connect_app($setup, 'host');
+    my $one = setup_connect_app($setup, 'host');
+    my $two = setup_connect_app($setup, 'host');
+    conn_call($one, qw(user ua));
+    conn_call($two, qw(user ub));
+
+    # Test
+    # - Submit a correct turn
+    my $turn = c2service::vp_make_turn($SLOT_NR, $DEFAULT_TIMESTAMP);
+    conn_call($root, 'trn', $turn);
+
+    # - Read out state
+    my %i = conn_call_list($two, 'gamestat', $gid);
+    assert_equals $i{turns}[$SLOT_NR-1], 1;
+
+    # - Mark temporary
+    conn_call($root, 'trnmarktemp', $gid, $SLOT_NR, 1);
+
+    %i = conn_call_list($two, 'gamestat', $gid);
+    assert_equals $i{turns}[$SLOT_NR-1], 17;           # does now see temporary flag
+
+    # Submit a yellow turn
+    my $hfc = setup_connect_app($setup, 'hostfile');
+    conn_call($hfc, qw(put bin/checkturn.sh), 'exit 1');
+    conn_call($root, 'trn', $turn);
+
+    # - Read out state
+    %i = conn_call_list($two, 'gamestat', $gid);
+    assert_equals $i{turns}[$SLOT_NR-1], 1;            # does not see yellow
+
+    # - Mark temporary
+    conn_call($root, 'trnmarktemp', $gid, $SLOT_NR, 1);
+
+    %i = conn_call_list($two, 'gamestat', $gid);
+    assert_equals $i{turns}[$SLOT_NR-1], 17;           # does see temporary flag but not yellow
 };
 
 # TestServerHostHostTurn::testStatusErrors: Test errors in setTemporary.

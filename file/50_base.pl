@@ -431,7 +431,9 @@ test 'file/50_base/stat', sub {
     assert_throws sub{ conn_call($fc, "stat", "both/f") }, 403;
     assert_throws sub{ conn_call($fc, "stat", "none") }, 403;
     assert_throws sub{ conn_call($fc, "stat", "none/f") }, 403;
-    assert_throws sub{ conn_call($fc, "stat", "listable") }, 403;
+
+    %i = conn_call_list($fc, "stat", "listable");
+    assert_equals $i{type}, 'dir';
 
     %i = conn_call_list($fc, qw(stat listable/f));
     assert_equals $i{type}, 'file';

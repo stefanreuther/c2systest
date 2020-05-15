@@ -11,61 +11,6 @@
 use strict;
 use c2systest;
 
-# TestServerTalkTalkNNTP::testLogin: Test login
-test 'talk/50_nntp/login', sub {
-    my $setup = shift;
-    setup_add_talk($setup);
-    setup_add_db($setup);
-    setup_add_mailout($setup);
-
-    my $preload_db = sub {
-        my $setup = shift;
-        my $db = setup_connect_app($setup, 'db');
-        conn_call($db, 'set', 'user:1009:password', '1,52YluJAXWKqqhVThh22cNw');
-        conn_call($db, 'set', 'uid:a_b', '1009');
-        conn_call($db, 'set', 'uid:root', '0');
-    };
-
-    # First test
-    {
-        setup_add_service_config($setup, 'user.key', 'xyz');
-        setup_start_wait($setup);
-        $preload_db->($setup);
-        my $tc = setup_connect_app($setup, 'talk');
-
-        # Success cases
-        assert_equals conn_call($tc, 'nntpuser', 'a_b', 'z'), 1009;
-        assert_equals conn_call($tc, 'nntpuser', 'A_B', 'z'), 1009;
-        assert_equals conn_call($tc, 'nntpuser', 'A->B', 'z'), 1009;
-
-        # Error cases
-        assert_throws sub{ conn_call($tc, 'nntpuser', 'root', '')    }, 401;
-        assert_throws sub{ conn_call($tc, 'nntpuser', 'a_b',  '')    }, 401;
-        assert_throws sub{ conn_call($tc, 'nntpuser', 'a_b',  'zzz') }, 401;
-        assert_throws sub{ conn_call($tc, 'nntpuser', 'a_b',  'Z')   }, 401;
-        assert_throws sub{ conn_call($tc, 'nntpuser', '',     'Z')   }, 401;
-        assert_throws sub{ conn_call($tc, 'nntpuser', '/',    'Z')   }, 401;
-
-        # User context does not change outcome
-        conn_call($tc, 'user', 'a');
-        assert_equals conn_call($tc, 'nntpuser', 'a_b', 'z'), 1009;
-        assert_throws sub{ conn_call($tc, 'nntpuser', 'a_b',  'Z')   }, 401;
-        setup_stop($setup);
-    }
-
-    # Second test, with different user key. This must make the test fail
-    {
-        setup_add_service_config($setup, 'user.key', 'abc');
-        setup_start_wait($setup);
-        $preload_db->($setup);
-        my $tc = setup_connect_app($setup, 'talk');
-
-        assert_throws sub{ conn_call($tc, 'nntpuser', 'a_b', 'z')    }, 401;
-        assert_throws sub{ conn_call($tc, 'nntpuser', 'root', '')    }, 401;
-        setup_stop($setup);
-    }
-};
-
 # TestServerTalkTalkNNTP::testGroups: Test newsgroup access commands: NNTPLIST, NNTPFINDNG, NNTPGROUPLS
 test 'talk/50_nntp/groups', sub {
     my $setup = shift;

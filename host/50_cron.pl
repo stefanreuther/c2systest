@@ -27,7 +27,9 @@ test 'host/50_cron/null', sub {
     # - Games 12,39,99 must exist for the commands to go through
     my $db = setup_connect_app($setup, 'db');
     conn_call($db, qw(sadd game:broken 39));
-    conn_call($db, qw(sadd game:all 12 39 99));
+    conn_call($db, qw(sadd game:all 12));
+    conn_call($db, qw(sadd game:all 39));
+    conn_call($db, qw(sadd game:all 99));
 
     # Test
     my $hc = setup_connect_app($setup, 'host');

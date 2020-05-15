@@ -44,6 +44,9 @@ conventions are:
 - `50_xxx`: equivalent to a unit test in c2ng
 - `90_NNN_xxx`: test case for bug NNN
 
+Folder `interactive` contains tests that set up an environment and
+serve it via HTTP, for interactive testing with a browser.
+
 
 Configuring
 -----------

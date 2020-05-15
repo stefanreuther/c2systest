@@ -134,8 +134,10 @@ test 'talk/50_user/newsrc/set', sub {
     conn_call($db, qw(sadd forum:2:threads 42));
 
     # - messages
-    conn_call($db, qw(sadd forum:2:messages), 3 .. 19);
-    conn_call($db, qw(sadd thread:42:messages), 3 .. 19);
+    foreach (3 .. 19) {
+        conn_call($db, qw(sadd forum:2:messages), $_);
+        conn_call($db, qw(sadd thread:42:messages), $_);
+    }
 
     # Test
     my $tc = setup_connect_app($setup, 'talk');
@@ -237,7 +239,9 @@ test 'talk/50_user/posted', sub {
 
     # Preload DB
     my $db = setup_connect_app($setup, 'db');
-    conn_call($db, qw(sadd user:1002:forum:posted 9 10 12));
+    foreach (qw(9 10 12)) {
+        conn_call($db, qw(sadd user:1002:forum:posted), $_);
+    }
 
     # Access as root
     my $tc = setup_connect_app($setup, 'talk');

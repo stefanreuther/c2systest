@@ -68,11 +68,50 @@ test 'web/x01_spider/anon_pop', sub {
     spider($setup);
 };
 
+# Spidering with all services, logged in.
+test 'web/x01_spider/login_pop', sub {
+    my $setup = shift;
+    spider_config($setup);
+    setup_add_db($setup);
+    my $talks    = setup_add_talk($setup);
+    my $mailouts = setup_add_mailout($setup);
+    my $hosts    = setup_add_host($setup);
+    my $ufs      = setup_add_userfile($setup);
+    my $hfs      = setup_add_hostfile($setup);
+    setup_add_usermgr($setup);
+    setup_start_wait($setup);
+
+    c2service::setup_db_init($setup);
+    c2service::setup_talk_init($setup);
+
+    # Add a posting and a message
+    my $uid = c2service::setup_db_add_user($setup, 'admin', 'allowadmin', 1);
+    my $talkc = service_connect($talks);
+    conn_call($talkc, 'postnew', 1, 'Subject', 'text:The text', 'USER', $uid);
+
+    conn_call($talkc, 'user', $uid);
+    conn_call($talkc, 'pmnew', "u:$uid", 'A mail', 'text:A mail text');
+
+    # Add tools and a game
+    c2service::setup_hostfile_add_defaults($setup);
+    my $hostc = service_connect($hosts);
+    conn_call($hostc, 'hostadd', 'H', '', '', 'hk');
+    conn_call($hostc, 'masteradd', 'M', '', '', 'mk');
+    conn_call($hostc, 'tooladd', 'T', '', '', 'tk');
+    conn_call($hostc, 'shiplistadd', 'S', '', '', 'sk');
+    my $gid = conn_call($hostc, 'newgame');
+    conn_call($hostc, 'gamesetstate', $gid, 'joining');
+    conn_call($hostc, 'gamesettype', $gid, 'public');
+
+    spider($setup, setup_make_cookie($setup, $uid));
+};
+
 
 # Perform a spidering test.
 # Starting at index.cgi, spiders everything that is reachable.
 sub spider {
     my $setup = shift;
+    my $cookie = shift;
     my @todo = ([Root => 'index.cgi']);
     my %done;
     my $base_path = setup_get_required_system_config($setup, 'c2web');
@@ -114,6 +153,7 @@ sub spider {
             my $cgi = cgi_new($setup, $script);
             if ($path ne '') { cgi_set_path($cgi, $path); }
             if ($query ne '') { cgi_set_raw_query_string($cgi, $query); }
+            if (defined($cookie)) { cgi_add_cookie($cgi, $cookie); }
 
             # Pre-verify
             if (!-x $base_path.'/'.$script) { assert_failure("Link '$url' referenced by '$trigger' points to non-existant script"); }
