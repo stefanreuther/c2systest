@@ -73,8 +73,10 @@ my $_log_level = 0;
 my $_log_color = -t STDOUT;
 my $_debug = 0;
 my $_test_only = 0;
+my $_test_match = '';
 my $_test_current = 0;
 my $_keep_temps = 0;
+my $_keep_going = 0;
 
 # cmdl_parse(): Parse command line.
 sub cmdl_parse {
@@ -95,8 +97,10 @@ sub cmdl_parse {
   --config=file      Set system configuration file name
   --[no-]colors      Colored output
   -v / -q            Add/remove verbosity
+  -k                 Keep going after failure
   --debug            Internal debug mode
   --only=N           Run only Nth test case
+  --match=N          Run only test cases matching regex
   --keep-temps=N     Keep temporary directories\n";
                 exit 0;
             } elsif (/^-D(.*?)=(.*)/) {
@@ -113,10 +117,14 @@ sub cmdl_parse {
                 $_log_level += $1;
             } elsif (/^-(q+)$/) {
                 $_log_level -= length($1);
+            } elsif (/^-k$/) {
+                $_keep_going = 1;
             } elsif (/^--?debug$/) {
                 $_debug = 1;
             } elsif (/^--?only=(\d+)$/) {
                 $_test_only = $1;
+            } elsif (/^--?match=(.*)/) {
+                $_test_match = $1;
             } elsif (/^--?keep-temps?$/) {
                 $_keep_temps = 1;
             } else {
@@ -462,7 +470,7 @@ sub setup_add_nntp {
 sub setup_add_mailout {
     my $setup = shift;
     my $tx = shift;
-    setup_add_app($setup, 'mailout', 'c2mailout', ($tx ? () : ('-notx')));
+    setup_add_app($setup, 'mailout', 'c2mailout', ($tx ? () : ('--notx')));
 }
 
 # setup_add_host($setup[, commandline]): add "host" service
@@ -1601,6 +1609,9 @@ sub test_if {
     if ($_test_only && $_test_only != $_test_current) {
         trace_test(trace_color('30;1', "SKIPPED"), " $name [#$_test_current]");
         1;
+    } elsif ($_test_match ne '' && $name !~ /$_test_match/) {
+        trace_test(trace_color('30;1', "SKIPPED"), " $name [#$_test_current]");
+        1;
     } else {
         my $setup = setup_create($name);
         if (!$cond->($setup)) {
@@ -1622,7 +1633,12 @@ sub test_if {
                 $_log_level = $saved_log_level;
                 setup_destroy($setup);
                 trace_test(trace_color(31, "FAILURE"), " $name");
-                die "$@";
+                die "$@" if !$_keep_going;
+
+                my $line = "$@";
+                chomp $line;
+                print STDERR "$line ", trace_color(1, '(proceeding anyway)'), "\n";
+                1;
             };
         }
         clear_context();

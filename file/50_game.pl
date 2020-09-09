@@ -2,7 +2,7 @@
 #
 #  File: FileBase
 #
-#  Synced with TestServerFileFileGame, 20170923.
+#  Synced with TestServerFileFileGame, 20200820.
 #  Fails with c2file-classic.
 #
 use strict;
@@ -65,6 +65,23 @@ test 'file/50_game/reg', sub {
     assert_equals $ki{file}, 'a/b/fizz.bin';
     %ki = @{$kis[1]};
     assert_equals $ki{file}, 'a/b/c/fizz.bin';
+    assert_equals $ki{id}, '611a7f755848a9605ad15d92266c0fb77161cf69';
+
+    # List with uniquisation
+    @kis = conn_call_list($fc, 'lsreg', 'a/b', 'uniq');
+    assert_equals scalar(@kis), 1;
+
+    %ki = @{$kis[0]};
+    assert_equals $ki{file}, 'a/b/fizz.bin';
+    assert_equals $ki{useCount}, 2;
+
+    # List with filter (mismatch)
+    @kis = conn_call_list($fc, 'lsreg', 'a/b', 'id', '?');
+    assert_equals scalar(@kis), 0;
+
+    # List with filter (match)
+    @kis = conn_call_list($fc, 'lsreg', 'a/b', 'id', '611a7f755848a9605ad15d92266c0fb77161cf69');
+    assert_equals scalar(@kis), 2;
 
     # Stat as user 1001
     conn_call($fc, qw(user 1001));

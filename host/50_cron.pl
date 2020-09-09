@@ -8,7 +8,7 @@ use strict;
 use c2systest;
 
 # For now, we can only adapt testNull() which uses a null scheduler.
-# The null scheduler is accessible using the command line option "-nocron".
+# The null scheduler is accessible using the command line option "--nocron".
 # Other tests used a mocked scheduler which we cannot do in the final system.
 
 test 'host/50_cron/null', sub {
@@ -19,7 +19,7 @@ test 'host/50_cron/null', sub {
     setup_add_userfile($setup);
     setup_add_mailout($setup);
     setup_add_talk($setup);
-    setup_add_host($setup, '-nocron');
+    setup_add_host($setup, '--nocron');
     setup_start_wait($setup);
 
     # Database

@@ -58,20 +58,21 @@ while (my $client = $listener->accept()) {
 
     # Transfer
     my $data = 0;
+    my $last_line;
     while (defined(my $line = readline($client))) {
         $line =~ s/[\r\n]//g;
         print LOG "$line\n";
         if ($data) {
-            if ($line eq '.') { 
+            if ($line eq '.') {
                 print $client "250 ok\r\n";
-                $data = 0; 
+                $data = 0;
             }
         } else {
             if (uc($line) eq 'DATA') {
                 print $client "354 send data\r\n";
                 $data = 1;
             } elsif (uc($line) eq 'QUIT') {
-                print $client "221 bye\r\n";
+                $last_line = "221 bye\r\n";
                 last;
             } else {
                 print $client "250 ok\r\n";
@@ -80,9 +81,12 @@ while (my $client = $listener->accept()) {
     }
 
     # Finish
-    close $client;
+    # First finish the log file, then confirm the network operation,
+    # so the test is guaranteed to find the complete log.
     close LOG;
-
     rename $new_name, $logfile_name
         or die "$new_name: $!";
+
+    print $client $last_line if $last_line;
+    close $client;
 }

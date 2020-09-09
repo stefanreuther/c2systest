@@ -456,10 +456,42 @@ test 'host/50_game/listuser', sub {
     assert_set_equals conn_call($hc, qw(gamelist user a id state running)), [];
 };
 
+# TestServerHostHostGame::testFilters: Test some more filters.
+test 'host/50_game/filters', sub {
+    my $setup = shift;
+    prepare($setup);
+
+    # Create a game
+    add_default_tools($setup);
+    my $gid = add_complex_game($setup);
+    assert_equals $gid, 1;
+
+    # Add a tool
+    my $dbc = setup_connect_app($setup, 'db');
+    conn_call($dbc, qw(sadd prog:tool:list T));
+    my $hc = setup_connect_app($setup, 'host');
+    conn_call($hc, qw(gameaddtool 1 T));
+
+    # Host filter
+    assert_set_equals conn_call($hc, qw(gamelist id host H)), [1];
+    assert_set_equals conn_call($hc, qw(gamelist id host notH)), [];
+
+    # Ship list filter
+    assert_set_equals conn_call($hc, qw(gamelist id shiplist S)), [1];
+    assert_set_equals conn_call($hc, qw(gamelist id shiplist notS)), [];
+
+    # Master filter
+    assert_set_equals conn_call($hc, qw(gamelist id master M)), [1];
+    assert_set_equals conn_call($hc, qw(gamelist id master notM)), [];
+
+    # Matching tool filter
+    assert_set_equals conn_call($hc, qw(gamelist id tool T)), [1];
+    assert_set_equals conn_call($hc, qw(gamelist id tool notT)), [];
+};
 
 sub prepare {
     my $setup = shift;
-    setup_add_host($setup, '-nocron');
+    setup_add_host($setup, '--nocron');
     setup_add_hostfile($setup, 'auto');
     setup_add_userfile($setup, 'auto');
     setup_add_db($setup);
@@ -485,7 +517,7 @@ sub add_default_tools {
     conn_call($db, qw(sadd prog:host:list H));
     conn_call($db, qw(sadd prog:host:list P));
     conn_call($db, qw(sadd prog:master:list M));
-    conn_call($db, qw(sadd prog:dl:list S));
+    conn_call($db, qw(sadd prog:sl:list S));
 }
 
 sub add_complex_game {

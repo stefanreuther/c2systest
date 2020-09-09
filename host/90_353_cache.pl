@@ -34,7 +34,7 @@ test 'host/90_353_cache', sub {
 
 sub prepare {
     my $setup = shift;
-    my $hs = setup_add_host($setup, '-nocron');
+    my $hs = setup_add_host($setup, '--nocron');
     my $hfs = setup_add_hostfile($setup, 'auto');
     setup_add_db($setup);
     setup_add_userfile($setup, 'auto');

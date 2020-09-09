@@ -342,7 +342,7 @@ test 'host/50_turn/status/errors', sub {
 
 sub prepare {
     my $setup = shift;
-    setup_add_host($setup, '-nocron');
+    setup_add_host($setup, '--nocron');
     setup_add_hostfile($setup, 'auto');
     setup_add_userfile($setup, 'auto');
     setup_add_db($setup);

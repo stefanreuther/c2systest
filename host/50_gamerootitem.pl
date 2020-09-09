@@ -20,7 +20,7 @@ sub conn_call_multi {
 # TestServerHostFileGameRootItem::testGame: test file structure
 test 'host/50_gamerootitem', sub {
     my $setup = shift;
-    setup_add_host($setup, '-nocron');
+    setup_add_host($setup, '--nocron');
     setup_add_hostfile($setup);
     setup_add_userfile($setup);
     setup_add_db($setup);

@@ -16,7 +16,7 @@ test 'host/50_ch', sub {
     setup_add_userfile($setup);
     setup_add_mailout($setup);
     setup_add_talk($setup);
-    setup_add_host($setup, '-nocron');
+    setup_add_host($setup, '--nocron');
     setup_start_wait($setup);
 
     # Environment

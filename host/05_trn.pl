@@ -32,6 +32,11 @@ test 'host/05_trn/user', sub {
     assert_equals $result{status}, 1;
     assert_equals $result{user}, $uid;
     assert_equals conn_call($hfc, qw(get games/0001/in/player3.trn)), $TRN;
+
+    # Turn file tracked as user
+    my @keys = @{conn_call($dbc, "smembers", "user:$uid:key:all")};
+    assert_equals scalar(@keys), 1;
+    assert_equals conn_call($dbc, "hget", "user:$uid:key:id:$keys[0]", "lastGame"), 1;
 };
 
 test 'host/05_trn/mail', sub {
@@ -44,6 +49,11 @@ test 'host/05_trn/mail', sub {
     assert_equals $result{status}, 1;
     assert_equals $result{user}, $uid;
     assert_equals conn_call($hfc, qw(get games/0001/in/player3.trn)), $TRN;
+
+    # Turn file tracked as user
+    my @keys = @{conn_call($dbc, "smembers", "user:$uid:key:all")};
+    assert_equals scalar(@keys), 1;
+    assert_equals conn_call($dbc, "hget", "user:$uid:key:id:$keys[0]", "lastGame"), 1;
 };
 
 test 'host/05_trn/mismatch', sub {
